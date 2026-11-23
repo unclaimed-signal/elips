@@ -111,14 +111,6 @@ button.quiet{font-size:1.5em;line-height:1.4;padding:.3em .5em;background:none;b
 #leadCredits .lead-note{font:1.25em Georgia,serif;color:#bda995}
 #leadCredits #leadCountdown{font:1.35em Georgia,serif;color:#bea981;margin-top:2em}
 #leadCredits #finalAgain{margin-top:1em}
-#mapPick,#scrub{background:rgba(5,2,8,.93)}
-#mapPick h2,#scrub h2{font-size:2.6em;margin:.2em 0;color:#e8c46a}#mapPick p,#scrub p{font-size:1.5em;max-width:24em;margin:.2em 0 .8em;color:#d7c8a6}
-#mpBox{position:relative;width:36em;max-width:96%;height:17em;background:#030203;border:.3em solid #cdb98c;border-radius:.4em;box-shadow:0 0 2em #000;overflow:hidden;touch-action:none;margin-bottom:1em}
-.zone{position:absolute;top:0;bottom:0;width:50%;display:flex;align-items:center;justify-content:center;font-size:1.45em;color:#e8d9b0;text-align:center;padding:0 .6em;box-sizing:border-box;opacity:.55;transition:opacity .2s,background .2s;pointer-events:none}
-.z1{left:0;background:rgba(150,80,20,.12)}.z2{right:0;background:rgba(150,20,70,.12);border-left:.1em dashed #cdb98c}.zone.on{opacity:1;background:rgba(200,60,40,.28)}
-#mpX{position:absolute;left:50%;top:50%;font-size:4.5em;line-height:0;transform:translate(-50%,-50%);color:#e8d9b0;text-shadow:0 0 .3em #a02030;pointer-events:none;font-family:Arial,sans-serif}
-#scrubBox{position:relative;width:26em;max-width:96%;aspect-ratio:2/1;overflow:hidden;border:.15em solid #8a6a2a;border-radius:.6em;background:#12060c;margin-bottom:.8em}
-#scrubImg{position:absolute;left:0;bottom:0;width:100%}#scrubC{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
 </style>
 </head>
 <body>
@@ -147,11 +139,6 @@ button.quiet{font-size:1.5em;line-height:1.4;padding:.3em .5em;background:none;b
     <button class="btn small" id="csBtn">Дальше ▸</button>
   </div>
 
-  <div id="mapPick" class="ov hide"><h2>ИСПРАВЛЕНИЕ КАРТЫ</h2><p>Карта закрашена целиком. Переставь крестик в одну из областей.</p>
-    <div id="mpBox"><div class="zone z1" id="mpZ1">ТАМ, ГДЕ ЧТО-ТО ПАДАЕТ</div><div class="zone z2" id="mpZ2">ТАМ, ГДЕ КТО-ТО СМОТРИТ</div><span id="mpX">✕</span></div>
-    <button class="btn small" id="mpOk">ПОДТВЕРДИТЬ КУРС</button></div>
-  <div id="scrub" class="ov hide"><h2>ОЧИСТКА ДЕМОНАСОВ</h2><p>Главный подозреваемый вооружён. Будем осторожны. Проведи пальцем — соскребай.</p>
-    <div id="scrubBox"><img id="scrubImg" alt=""><canvas id="scrubC"></canvas></div><div id="scrubPct">Чистота: 0%</div><br><button class="btn small" id="scrubOk">ГОТОВО</button></div>
   <div id="signal" class="ov hide">
     <div class="static">INFORMATION SYSTEMS: UNSTABLE</div>
     <h2>ЧУЖОЙ ЭФИР</h2>
@@ -363,7 +350,7 @@ const HULL=[[0,-32,9],[0,-6,15],[-20,22,10],[20,22,10],[0,32,12]];
 
 function newPlayer(){
   return {x:W/2,y:H-170,tx:W/2,ty:H-170,px:W/2,py:H-170,hp:100,inv:0,bombs:1,fire:0,
-    buf:{tri:0,rapid:0,wit:0,shield:0,wind:0,bit:0},dr:[{x:W/2-50,y:H-150},{x:W/2+50,y:H-150}],moved:false,gazeT:0,flick:0,hist:[],ord:null,heat:0,mute:0};
+    buf:{tri:0,rapid:0,wit:0,shield:0,wind:0,bit:0},dr:[{x:W/2-50,y:H-150},{x:W/2+50,y:H-150}],moved:false,gazeT:0,flick:0};
 }
 
 /* ================= input ================= */
@@ -408,7 +395,7 @@ $('btnBomb').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDef
 
 /* ================= dialogue ================= */
 const sayQ=[];let sayT=0;
-function say(t,pri){ if(['cut','riftfinal','ledger','credits','leadcredits'].includes(G.mode))return; if(pri){sayQ.length=0;sayT=0;$('say').classList.add('hide')}  if(sayQ.length>4)sayQ.shift(); sayQ.push(t); }
+function say(t,pri){ if(pri){sayQ.length=0;sayT=0;$('say').classList.add('hide')}  if(sayQ.length>4)sayQ.shift(); sayQ.push(t); }
 function updSay(dt){
   if(sayT>0){sayT-=dt;if(sayT<=0)$('say').classList.add('hide');return}
   if(sayQ.length){const t=sayQ.shift();$('sayTxt').textContent=t;$('say').classList.remove('hide');sayT=Math.min(5,1.9+t.length*.045)}
@@ -443,7 +430,7 @@ const ELPIS_KILL=[
 ];
 const ELPIS_NEAR=[
  '— Корпус держится на честном слове. Слово даёт экипаж.',
- '— Корпус скрипит как оркестр. Играть дальше.',
+ '— Если это конец, где жалованье экипажу?',
  '— Всем держаться! — Держимся. — Я тоже. Единогласно.'
 ];
 const ELPIS_ESC=[
@@ -495,7 +482,7 @@ $('cs').addEventListener('pointerdown',e=>{if(e.target===$('cs')||e.target.id===
 /* ================= scripts / flow ================= */
 $('go').onclick=()=>{
   audioStart(); $('title').classList.add('hide');
-  G.score=0;G.talons=0;G.kRock=0;G.kMon=0;G.buffs=0;G.deaths=0;G.time=0;G.rescues=0;G.failed=0;G.signal='';G.rescuedNames=[];G.pixelJumps=0;G.qteSuccess=0;G.stampsUsed=0;G.kEye=0;G.kTent=0;G.kClone=0;G.hpLost=0;G.talonBomb=0;G.riftT=0;G.finalStarted=false;G.escDmg=0;G.counters=0;G.dirt=0;G.cleanN=0;G.kWit=0;G.ordDone=0;G.route=null;
+  G.score=0;G.talons=0;G.kRock=0;G.kMon=0;G.buffs=0;G.deaths=0;G.time=0;G.rescues=0;G.failed=0;G.signal='';G.rescuedNames=[];G.pixelJumps=0;G.qteSuccess=0;G.stampsUsed=0;G.kEye=0;G.kTent=0;G.kClone=0;G.hpLost=0;G.talonBomb=0;G.riftT=0;G.finalStarted=false;
   P=newPlayer();
   cutscene([
     {t:'Эльпис отправился в бескрайнюю черноту — донести Весть о Бздуне туда, где нет света и чужого зрения.'},
@@ -506,7 +493,7 @@ $('go').onclick=()=>{
     {t:'— Правильно. Сначала проверить, привязаны ли.',c:1,btn:'ОТДАТЬ ШВАРТОВЫ (САМОМУ)'}
   ],()=>startAct(0));
 };
-function startAct(i,retry){G.nOrd=0;G.ordNext=40+rnd(0,25);G.evN=0;G.evNext=40;G.evPool=null;G.mapDone=0;G.mapAt=90+rnd(0,20);G.route=null;if(G.mode==='mappick')G.mode='play';G.evNext=40;G.ev=null;G.plaque=null;G.counter=0;G.crew=null;if(P){P.ord=null;P.heat=0;P.mute=0}
+function startAct(i,retry){
   G.act=i; G.t=0; D={n:{},done:{},lock:0};
   bullets=[];ebul=[];ents=[];tents=[];picks=[];rifts=[];parts=[];texts=[];gaze=null;boss=null;escort=null;G.banner=null;G.stamp=0;
   P.x=P.tx=W/2;P.y=P.ty=H-170;P.inv=2;P.hp=retry?85:Math.min(100,Math.max(P.hp+(i?10:0),i?60:100));P.bombs=retry?Math.max(P.bombs,1):P.bombs; if(i===3&&P.bombs<1)P.bombs=1;
@@ -534,7 +521,7 @@ function actDone(){
     {t:'— Кто запачкал мои демонасы?!',c:1},
     {t:'Пришлось соскребать монстра вилами. В бухгалтерии это прошло как уборка территории.'},
     {t:'К вечеру не появился ветер.',btn:'ВЕРНУТЬСЯ НА БОРТ'}
-  ],()=>scrubThen(()=>startAct(1)),{...mapOpt,bar:true});
+  ],()=>startAct(1),{...mapOpt,bar:true});
   else if(i===1)cutscene([
     {t:'На том же метеорите всё ещё был бар, в котором никого не было. Эльпис вернулся проверить, не ошибся ли он с аудиторией.'},
     {t:'Эльпис приказал выдать каждому половину пайка. Остатков хватило бы на бесконечность.',x:60},
@@ -546,14 +533,14 @@ function actDone(){
     {t:'Велел экипажу отвернуться. Повернулся только сам.'},
     {t:'— Не подглядывать!',c:1},
     {t:'Кажется, это уже читателю.',btn:'ЗАКРЫТЬ БАР И УЙТИ'}
-  ],()=>scrubThen(()=>startAct(2)),{...mapOpt,bar:true});
+  ],()=>startAct(2),{...mapOpt,bar:true});
   else if(i===2)cutscene([
     {t:'Метеорит остался позади. Радиоприёмник из пустого бара продолжал шипеть. Эльпис записал шипение в состав экипажа.'},
     {t:'Для оглашения Вести место подошло: Эльпис уже встал.',x:86},
     {t:'— Команда! Торжественное молчание!',c:1},
     {t:'Безупречно.'},
     {t:'— Уважаемые присутствующие! И отсутствующие, которым передадут. Прибыл сообщить о Бздуне!',c:1,btn:'ОГЛАСИТЬ ВЕСТЬ'}
-  ],()=>scrubThen(()=>startAct(3)),mapOpt);
+  ],()=>startAct(3),mapOpt);
 }
 
 function startRiftFinal(){
@@ -642,7 +629,7 @@ function showLedger(){
     n('Получено повреждений',Math.round(G.hpLost))+
     n('Списаний за счёт бюджета',G.deaths)+n('Время в пути',m+':'+String(s).padStart(2,'0'))+
     n('Источник сигнала',G.signal==='check'?'сверен':G.signal==='take'?'принят':'не установлен')+
-    ledgerNotes()+'<h3>ЭКИПАЖ ПО ВЕДОМОСТИ</h3>'+n('Фактически находился на борту','Эльпис')+
+    '<h3>ЭКИПАЖ ПО ВЕДОМОСТИ</h3>'+n('Фактически находился на борту','Эльпис')+
     n('Должностей утверждено',CREW_COUNT)+n('Подписи о явке','одна, зато уверенная')+
     '<div class="sig">Выплачено<small>расписался за всех — Эльпис</small></div>';
   $('ledger').classList.remove('hide');$('endLine').classList.add('hide');$('again').classList.add('hide');
@@ -669,7 +656,7 @@ function pixBurst(x,y,n){const pal=['#ff2bd6','#20f0ff','#b6ff3c','#ffffff','#ff
 function popText(x,y,t,c){texts.push({x,y,t,c:c||'#ffe9a0',l:1.1})}
 function banner(a,b){G.banner={a,b,t:0,m:2.4}}
 const aim=(x,y)=>Math.atan2(P.y-y,P.x-x);
-function ebullet(x,y,ang,sp,r,d,col){if(G.route&&G.route.k==='watch')sp*=1.12;if(ebul.length>230)return;ebul.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:r||5,d:d||9,col:col||'#ff4057'})}
+function ebullet(x,y,ang,sp,r,d,col){if(ebul.length>230)return;ebul.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:r||5,d:d||9,col:col||'#ff4057'})}
 
 /* ================= spawners ================= */
 const RR=[0,14,24,38],RHP=[0,2,5,10],RSC=[0,10,20,40];
@@ -744,7 +731,7 @@ function escortFail(){
 function escortHurt(d){
   if(!escort||!escort.active||escort.inv>0||G.mode!=='play')return;
   if(P&&Math.hypot(P.x-escort.x,P.y-escort.y)<95)d*=.58;
-  if(escort.hp-d<escort.max*.4)sayRare(ELPIS_ESC,.5,9000);G.escDmg=(G.escDmg||0)+d;escort.hp-=d;escort.inv=.34;escort.grace=0;G.flash=.1;G.shake=Math.max(G.shake,5);
+  if(escort.hp-d<escort.max*.4)sayRare(ELPIS_ESC,.5,9000);escort.hp-=d;escort.inv=.34;escort.grace=0;G.flash=.1;G.shake=Math.max(G.shake,5);
   burst(escort.x,escort.y,9,'#f1c66b',100,.4,3);
   if(escort.hp<=0){escort.hp=0;escortFail()}
 }
@@ -952,11 +939,11 @@ function director(dt){
     every('eye',8,12,62,190,()=>Math.random()<.5?spawnEye(rnd(80,W-80),-30):eyeLine());
     at('p1',72,()=>spawnPick('ration',rnd(60,W-60),-20)); at('p2',130,()=>spawnPick('ration',rnd(60,W-60),-20));
     at('pb',110,()=>spawnPick('bomb',rnd(60,W-60),-20));
-    at('shoes',135,()=>say('— Опять в чудовище. Вилы, ко мне: соскребать будем по смете.',true));
-    at('z',188,()=>say('Прошли. Чернота даже не заметила.'));
+    at('shoes',135,()=>say('— Кто запачкал мои демонасы?! Вилы, ко мне. Соскребать будем по смете.',true));
+    at('z',188,()=>say('Продвигались.'));
     if(G.t>=ACTS[0].dur&&G.mode==='play')actDone();
   }else if(a===1){
-    at('a',1.5,()=>say('Ветра по-прежнему нет. Проверили дважды.'));every('wit',36,52,45,200,witSpawn);
+    at('a',1.5,()=>say('К вечеру не появился ветер.'));
     at('b',6,()=>say('— Боцман, где попутный?'));
     at('c',10,()=>say('Никто не доложил.'));
     at('d',15,()=>say('Мировой кризис только начался, а ветер уже придерживают.'));
@@ -974,7 +961,7 @@ function director(dt){
     every('allyTent',8,11,120,165,()=>{if(escort&&escort.active)spawnTent(escort.x<W/2?-1:1,escort.y,320,4,0,'grasp')});
     if(G.t>=ACTS[1].dur&&G.mode==='play'&&G.rescues>=1&&!escort?.active)actDone();
   }else if(a===2){
-    at('a',1.5,()=>say('Чернота подозрительная. Смотрит — не моргает.'));evDirector();every('wit',44,60,35,200,witSpawn);
+    at('a',1.5,()=>say('Чернота подозрительная. Смотрит — не моргает.'));
     every('rock',2.2,3.2,3,216,rockFall);
     every('eye',5.5,8,10,215,()=>Math.random()<.5?eyeV():eyeLine());
     every('diver',6,9,24,215,()=>{const n=ri(1,2);for(let i=0;i<n;i++)setTimeout(()=>{if(G.mode==='play'&&G.act===2)spawnDiver()},i*500)});
@@ -1000,7 +987,7 @@ function director(dt){
 /* gaze event */
 function startGaze(first){
   gaze={t:0,st:'warn',dmg:0,ok:true};D.lock=6.5;sfx('gaze');
-  if(first)say('— На Чёрном Эфире такое видел. Глаза не поднимать!',true);else say('— Глаза на палубу!',true);
+  if(first)say('— На Чёрном Эфире такое видел. Не подглядывать!',true);else say('— Не подглядывать!',true);
 }
 function updGaze(dt){
   if(!gaze)return;gaze.t+=dt;
@@ -1016,14 +1003,14 @@ function initBoss(){
   boss={x:W/2,y:-230,t:0,state:'enter',phase:1,charge:0,clones:[],eyes:[
     {ox:-98,oy:30,hp:180,max:180,id:nid(),f:0,st:1.2},{ox:0,oy:-14,hp:215,max:215,id:nid(),f:0,st:2.0},{ox:98,oy:30,hp:180,max:180,id:nid(),f:0,st:2.8}],
     maw:{hp:530,max:530,open:0,id:nid(),f:0},ring:4,sp:0,spT:0,spOn:3.2,tentT:6,dyT:0,xp:0,bt:0};
-  setTimeout(()=>{if(boss&&G.mode==='play')say('Место для оглашения подходящее. Слушателей хватит.',true)},800);
-  setTimeout(()=>{if(boss&&G.mode==='play')say('Теперь у темноты есть глаза. За наблюдение я не платил.')},4500);
+  setTimeout(()=>{if(boss&&G.mode==='play')say('Для оглашения Вести место подошло.',true)},800);
+  setTimeout(()=>{if(boss&&G.mode==='play')say('Чернота молчала. Но теперь у неё были глаза. За наблюдение я не платил.')},4500);
 }
 const eyePos=e=>({x:boss.x+e.ox,y:boss.y+e.oy});
 function bossDie(){
   if(!boss||boss.state==='dying')return;
   boss.state='dying';boss.dyT=0;ebul=[];tents.forEach(t=>{t.st='in'});G.kMon++;
-  say('— Возражений больше нет. Протокол ведёт стена.',true);sfx('boom');
+  say('Весть принята единогласно.',true);sfx('boom');
 }
 function updBoss(dt){
   const B=boss;B.t+=dt;
@@ -1068,16 +1055,6 @@ function updBoss(dt){
     }
     return;
   }
-  if(B.phase===5&&!D.crewDone){
-    if(!G.crew){G.crew={t:0,s:0};ebul=[];tents=[];sfx('warn')}
-    const C=G.crew;C.t+=dt;if(C.t>1.4&&C.t<3.4)G.glitch=Math.max(G.glitch,.7);
-    if(C.t>1.4&&C.s===0){C.s=1;sfx('gaze');G.shake=Math.max(G.shake,10)}
-    if(C.t>3.8&&C.s===1){C.s=2;say('— Боцман, доложить о потерях!',true)}
-    if(C.t>5.2&&C.s===2){C.s=3;say('Молчание.',true)}
-    if(C.t>6.4&&C.s===3){C.s=4;say('— Ни одного. Превосходная дисциплина.',true)}
-    if(C.t>8.2){D.crewDone=1;G.crew=null;B.ring=2.5;B.tentT=4}
-    return;
-  }
   if(B.phase===5){
     B.maw.open=1;B.spT+=dt;B.bt-=dt;B.tentT-=dt;B.ring-=dt;
     const cyc=B.spT%5.5;
@@ -1118,7 +1095,7 @@ function bossHit(b){
 /* ================= update ================= */
 function bomb(){
   if(G.mode!=='play'||!P||P.bombs<=0||G.stamp>0)return;
-  P.bombs--;G.stampsUsed++;reflectBullets();ebul=[];G.stamp=1.3;G.flash=.7;G.shake=18;P.inv=Math.max(P.inv,1.35);sfx('bomb');
+  P.bombs--;G.stampsUsed++;ebul=[];G.stamp=1.3;G.flash=.7;G.shake=18;P.inv=Math.max(P.inv,1.35);sfx('bomb');
   for(const e of ents)hurtEnt(e,e.kind==='rock'?26:12);
   for(const t of tents)hurtTent(t,t.variant==='grasp'?45:36);
   if(escort&&escort.active){escort.inv=Math.max(escort.inv,1.9);escort.grabbed=0}
@@ -1134,7 +1111,7 @@ function bomb(){
 
 function hurtP(d){
   if(G.god||P.inv>0||P.buf.shield>0||G.mode!=='play')return;
-  if(P.ord&&P.ord.k==='cover')d*=.5;const was=P.hp;P.hp-=d;G.hpLost+=Math.min(d,was);P.inv=1.1;G.shake=12;G.flash=.3;sfx('hurt');burst(P.x,P.y,12,'#ff3b4e',180,.5,4);
+  const was=P.hp;P.hp-=d;G.hpLost+=Math.min(d,was);P.inv=1.1;G.shake=12;G.flash=.3;sfx('hurt');burst(P.x,P.y,12,'#ff3b4e',180,.5,4);
   if(P.hp>0&&P.hp<=18&&!P.nearSaid){P.nearSaid=1;say(pick(ELPIS_NEAR),true)}
   else if(P.hp>0&&Math.random()<.35)say(pick(P.hp<30?ELPIS_LOW:ELPIS_HURT),true);
   if(P.hp<=0){P.hp=0;die()}
@@ -1147,9 +1124,9 @@ function killEnt(e){
   e.dead=true;G.score+=e.score;boom(e.x,e.y,e.r*1.6);
   if(e.kind==='rock'){G.kRock++;
     if(e.size>1)for(let i=0;i<2;i++)spawnRock(e.size-1,e.x+(i?10:-10),e.y,e.vx+(i?60:-60)+rnd(-20,20),e.vy*rnd(.8,1.2)+rnd(-20,30));
-    if(Math.random()<(G.route&&G.route.k==='fall'?.34:.16))dropTalons(e.x,e.y,e.size);
+    if(Math.random()<.16)dropTalons(e.x,e.y,e.size);
     if(Math.random()<.006&&G.act===0)spawnPick('ration',e.x,e.y);
-  }else{G.kMon++;G.dirt=Math.min(14,(G.dirt||0)+(e.kind==='eye'?1.2:.8));if(e.kind==='wit')G.kWit=(G.kWit||0)+1;sayRare(ELPIS_KILL,.12,16000);if(e.kind==='eye')G.kEye++;dropTalons(e.x,e.y,e.kind==='eye'?3:2);if(Math.random()<.008&&G.act!==1)spawnPick('ration',e.x,e.y);
+  }else{G.kMon++;sayRare(ELPIS_KILL,.12,16000);if(e.kind==='eye')G.kEye++;dropTalons(e.x,e.y,e.kind==='eye'?3:2);if(Math.random()<.008&&G.act!==1)spawnPick('ration',e.x,e.y);
     if(e.kind==='eye'&&!D.sawEye&&G.act===0){D.sawEye=1;say('Помолчал.',true);say('— Я тоже. Показания сходятся.');say('Записал: «Двое независимых свидетелей».')}}
 }
 function hurtTent(t,d){
@@ -1181,184 +1158,25 @@ function shoot(){
   const pb=(x,y,ang)=>bullets.push({x,y,vx:Math.sin(ang)*sp,vy:-Math.cos(ang)*sp,dmg:d,pierce:bit?3:0,r:bit?7:4,hit:null,life:1.6,bit});
   pb(P.x-8,P.y-42,0);pb(P.x+8,P.y-42,0);
   if(P.buf.tri>0){pb(P.x,P.y-50,0);pb(P.x-14,P.y-34,-.2);pb(P.x+14,P.y-34,.2)}
-  if(P.buf.wit>0&&(P.sn=(P.sn||0)+1)%3)for(const dr of P.dr){pb(dr.x,dr.y-30,0);bullets[bullets.length-1].dmg=.5}
-  if(P.ord&&P.ord.k==='guns'){pb(P.x-20,P.y-36,-.12);pb(P.x+20,P.y-36,.12);pb(P.x,P.y-52,0)}
+  if(P.buf.wit>0)for(const dr of P.dr)pb(dr.x,dr.y-10,0);
   sfx('shoot');
 }
-
-/* ===== extras: orders, counter-stamp, Ether events, crew event, ledger notes ===== */
-const ORDERS={
- ahead:{n:'ПОЛНЫЙ ВПЕРЁД!',s:'ход +30% · огонь чаще',d:10,say:'— Полный вперёд! Есть полный вперёд. Возражений не поступало.'},
- cover:{n:'ВСЕМ УКРЫТЬСЯ!',s:'урон вдвое меньше · огонь реже',d:8,say:'— Всем укрыться! Укрылись. Я тоже, на всякий случай.'},
- guns:{n:'ОРУДИЯ К БОЮ!',s:'вилы усилены · затем перегрев',d:6,say:'— Орудия к бою! Бой принял орудия.'}};
-function fireMul(){return P.ord?(P.ord.k==='ahead'?.87:P.ord.k==='cover'?2:1):(P.heat>0?1.6:1)}
-function histAt(d){const h=P.hist,tt=G.time-d;for(let i=0;i<h.length;i++)if(h[i].t>=tt)return h[i];return h[h.length-1]||{x:P.x,y:P.y}}
-function evOK(){return G.mode==='play'&&!boss&&!(escort&&escort.active)&&!gaze&&!G.ev&&D.lock<=0}
-function extrasTick(dt){
-  P.hist.push({t:G.time,x:P.x,y:P.y});while(P.hist.length>2&&P.hist[0].t<G.time-3.6)P.hist.shift();
-  if(P.heat>0)P.heat-=dt;if(P.mute>0)P.mute-=dt;if(G.counter>0)G.counter-=dt;
-  if(G.plaque){G.plaque.t+=dt;if(G.plaque.t>2.4)G.plaque=null}
-  if(P.ord){P.ord.t-=dt;if(P.ord.t<=0){const k=P.ord.k;P.ord=null;
-    if(k==='guns'){P.heat=3;popText(P.x,P.y-50,'ПЕРЕГРЕВ','#ff9a6a')}
-    if(!G.ordDone){G.ordDone=1;say('— Приказ выполнен! Отлично. Кто исполнял — выясним после.')}}}
-  else if(G.act<3&&evOK()&&G.t>=G.ordNext&&G.nOrd<2&&!(P.heat>0)){
-    const ks=Object.keys(ORDERS).filter(k=>k!==G.lastOrd),k=pick(ks),O=ORDERS[k];G.lastOrd=k;
-    P.ord={k,t:O.d};G.nOrd++;G.ordNext=G.t+60+rnd(0,25);G.plaque={t:0,a:'ПРИКАЗ КАПИТАНА',b:O.n,c:O.s};sfx('warn');say(O.say,true)}
-  evUpdate(dt);routeTick(dt);
-  if(G.act<3&&(G.act===0||G.act===2)&&!G.mapDone&&G.t>=G.mapAt&&evOK()&&!P.ord&&!G.route)showMapPick();
-}
-function reflectBullets(){
-  if(!ebul.some(b=>Math.hypot(b.x-P.x,b.y-P.y)<80))return;let n=0;
-  for(const b of ebul){if(n>=14)break;if(Math.hypot(b.x-P.x,b.y-P.y)>150)continue;n++;
-    bullets.push({x:b.x,y:b.y,vx:-b.vx*1.5,vy:-b.vy*1.5,dmg:1.2,pierce:0,r:6,hit:null,life:1.7,refl:true})}
-  G.counter=1.6;G.counters=(G.counters||0)+1;G.shake=Math.max(G.shake,8);say('— Попадание не согласовано. Вернуть отправителю.',true)}
-function evDirector(){
-  if(G.evN>=4||G.t<G.evNext||!evOK())return;
-  if(!G.evPool)G.evPool=['bort','fake','silence','tents','wind','check'].sort(()=>Math.random()-.5);
-  G.evNext=G.t+38+rnd(0,8);startEv(G.evPool[G.evN++])}
-function zonesPick(n){const z=[];let g=0;while(z.length<n&&g++<60){const x=rnd(70,W-70),y=rnd(220,700);
-  if(Math.hypot(x-P.x,y-P.y)>150&&z.every(q=>Math.hypot(q.x-x,q.y-y)>110))z.push({x,y,r:46})}return z}
-function startEv(k){
-  if(k==='bort'||k==='fake'){const gy=rnd(300,620),ys=[];for(let y=150;y<800;y+=62)if(Math.abs(y-gy)>95)ys.push(y+rnd(-8,8));
-    G.ev={k:'bort',t:0,n:0,ys,real:k==='fake'?-1:1};banner('ВНИМАНИЕ.','ПРАВЫЙ БОРТ')}
-  else if(k==='silence'){G.ev={k,t:0};banner('ПРЕКРАТИТЬ ОГОНЬ','ПРИКАЗ БЕЗ ПОДПИСИ');P.mute=4.2;
-    for(const [x,y] of [[70,260],[W-70,260],[W/2,170]])spawnEye(x,-30,y)}
-  else if(k==='tents'){G.ev={k,t:0,n:0};banner('ОБЪЕКТ СЛЕВА.','ОБЪЕКТ СПРАВА')}
-  else if(k==='wind'){G.ev={k,t:0,dir:Math.random()<.5?-1:1,s:0};banner('ПОПУТНЫЙ ВЕТЕР','ОБНАРУЖЕН')}
-  else{G.ev={k:'check',t:0,z:zonesPick(3),f:0,ph:0};banner('СИГНАЛ ПРОВЕРЕН','ВСЁ В П0РЯДКЕ');G.glitch=.5}
-  sfx('warn')}
-function evUpdate(dt){const E=G.ev;if(!E)return;E.t+=dt;
-  if(E.k==='bort'){
-    while(E.n<E.ys.length&&E.t>2.3+E.n*.14){spawnRock(1,E.real>0?W+40:-40,E.ys[E.n],-E.real*520,rnd(-10,10));E.n++;if(E.n===1)sfx('boom')}
-    if(E.t>2.3+E.ys.length*.14+2.4){G.ev=null;say(E.real<0?'— Кто отдал приказ? Я? Не помню. Значит, приказ подозрительный.':'— Борт отбит. Приказ был чей-то. Не мой, но справедливый.')}
-  }else if(E.k==='silence'){if(E.t>5.6){G.ev=null;say('— Огонь прекращён и возобновлён. Экипаж не возражал.')}}
-  else if(E.k==='tents'){
-    const sch=[[.9,-1],[3.6,1],[6.3,-1],[6.9,1]];
-    while(E.n<sch.length&&E.t>sch[E.n][0]){spawnTent(sch[E.n][1],rnd(300,560),rnd(220,280),2.5,0,'sweep');E.n++}
-    if(E.t>11.5){G.ev=null;say('— Слева объект, справа объект. Объектов больше, чем экипажа. Рекорд.')}
-  }else if(E.k==='wind'){
-    if(!E.s){E.s=1;spawnEye(120,-30,200);spawnEye(W-120,-30,250)}
-    if(E.t>1.2&&E.t<7.4){const f=E.dir;P.x=clamp(P.x+f*90*dt,36,W-36);P.tx=clamp(P.tx+f*90*dt,36,W-36);for(const b of ebul)b.vx+=f*75*dt;G.scroll+=dt*.8}
-    if(E.t>8.4){G.ev=null;say('— Ветер был. Кто его заказывал? Никто? Тогда он подозрительный.')}
-  }else{
-    if(E.t>1.8&&E.f===0){E.f=1;for(const z of E.z)for(let i=0;i<10;i++)ebullet(z.x,z.y,i/10*TAU+rnd(0,.3),140,5,8,'#ff5a8a');sfx('boom')}
-    if(E.t>2.7&&E.ph===0){E.ph=1;G.glitch=1;E.z=zonesPick(3);sfx('rift')}
-    if(E.t>4.5&&E.f===1){E.f=2;for(const z of E.z)for(let i=0;i<10;i++)ebullet(z.x,z.y,i/10*TAU+rnd(0,.3),140,5,8,'#ff5a8a');sfx('boom')}
-    if(E.t>6.6){G.ev=null;say('— Сигнал проверен. Проверяющий не найден. Результат принят.')}}
-}
-function showMapPick(){G.mode='mappick';G.mapDone=1;ebul=[];clearSay();mpMoved=0;$('mpX').style.left='50%';$('mpX').style.top='50%';$('mpZ1').classList.remove('on');$('mpZ2').classList.remove('on');$('mapPick').classList.remove('hide');sfx('ui')}
-let mpMoved=0,mpPx=.5;
-(function(){const mb=$('mpBox'),mx=$('mpX');let drag=0;
-  const set=e=>{const r=mb.getBoundingClientRect();mpPx=clamp((e.clientX-r.left)/r.width,.04,.96);const py=clamp((e.clientY-r.top)/r.height,.1,.9);mx.style.left=mpPx*100+'%';mx.style.top=py*100+'%';mpMoved=1;$('mpZ1').classList.toggle('on',mpPx<.5);$('mpZ2').classList.toggle('on',mpPx>=.5)};
-  mb.addEventListener('pointerdown',e=>{try{mb.setPointerCapture(e.pointerId)}catch(_){}drag=1;set(e)});
-  mb.addEventListener('pointermove',e=>{if(drag)set(e)});mb.addEventListener('pointerup',()=>drag=0);mb.addEventListener('pointercancel',()=>drag=0);
-  $('mpOk').onclick=()=>{if(G.mode!=='mappick')return;const k=(mpMoved?mpPx<.5:Math.random()<.5)?'fall':'watch';
-    $('mapPick').classList.add('hide');G.mode='play';G.route={k,t:40,rt:0};P.inv=Math.max(P.inv,1.5);
-    if(k==='watch')spawnRift();
-    say('— Курс изменён. Мы продвинулись на два сантиметра. По карте.',true);banner(k==='fall'?'КУРС: ГДЕ ЧТО-ТО ПАДАЕТ':'КУРС: ГДЕ КТО-ТО СМОТРИТ','35–45 СЕК.')}
-})();
-function routeTick(dt){const R=G.route;if(!R)return;R.t-=dt;R.rt-=dt;
-  if(R.k==='fall'&&R.rt<=0&&!boss){R.rt=.6;rockFall()}
-  if(R.k==='watch'&&R.rt<=0&&!boss&&ents.filter(e=>e.kind==='eye').length<5){R.rt=5.5;spawnEye(rnd(80,W-80),-30)}
-  if(R.t<=0)G.route=null}
-/* Witness of movement */
-function witSpawn(){if(G.mode!=='play'||boss||(escort&&escort.active)||G.ev||ents.some(e=>e.kind==='wit'))return;
-  ents.push({id:nid(),kind:'wit',r:19,hp:12,max:12,x:rnd(130,W-130),y:-40,hy:195,t:0,flash:0,score:90,st:0,rec:[],rt:0,fi:0,ft:0,cy:0});
-  if(!D.sawWit){D.sawWit=1;say('— Следит за мной. Очень хорошо. Наконец-то на корабле появился заинтересованный зритель.',true)}}
-function updWit(e,dt){e.t+=dt;e.flash=Math.max(0,e.flash-dt);
-  if(e.st===0){if(e.y<e.hy)e.y+=95*dt;else{e.st=1;e.t=0}}
-  else if(e.st===1){e.x=clamp(e.x+Math.sin(e.t*1.4)*30*dt,60,W-60);e.rt-=dt;if(e.rt<=0){e.rt=.3;e.rec.push({x:P.x,y:P.y})}if(e.t>3.6){e.st=2;e.t=0;e.fi=0;sfx('warn')}}
-  else if(e.st===2){if(e.t>1){e.st=3;e.t=0;e.ft=0}}
-  else if(e.st===3){e.ft-=dt;if(e.ft<=0&&e.fi<e.rec.length){e.ft=.2;const p=e.rec[e.fi++];ebullet(e.x,e.y+16,Math.atan2(p.y-e.y,p.x-e.x),230,5,9,'#7ad8ff')}
-    if(e.fi>=e.rec.length&&e.t>e.rec.length*.2+.8){if(++e.cy<2){e.st=1;e.t=0;e.rec=[];e.rt=0}else e.st=4}}
-  else{e.y-=150*dt;if(e.y<-60)e.dead=true}}
-function drawWit(e){const col=e.st===1?'122,216,255':e.st===2?'255,196,80':'255,80,90';
-  if(e.st>=1&&e.st<=3&&e.rec.length){ctx.save();ctx.strokeStyle='rgba('+col+','+(e.st===1?.5:.5+.4*Math.sin(e.t*22)**2)+')';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(e.rec[0].x,e.rec[0].y);for(const p of e.rec)ctx.lineTo(p.x,p.y);if(e.st===1)ctx.lineTo(P.x,P.y);ctx.stroke();
-    ctx.fillStyle='rgba('+col+',.7)';for(let i=e.st===3?e.fi:0;i<e.rec.length;i++){ctx.beginPath();ctx.arc(e.rec[i].x,e.rec[i].y,3,0,TAU);ctx.fill()}ctx.restore()}
-  ctx.save();ctx.shadowColor='rgb('+col+')';ctx.shadowBlur=14;ctx.strokeStyle='rgba('+col+',.8)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,e.r+8+Math.sin(e.t*6)*2,0,TAU);ctx.stroke();
-  for(let i=0;i<4;i++){const a=e.t*1.5+i*TAU/4;ctx.fillStyle='rgba('+col+',.8)';ctx.fillRect(e.x+Math.cos(a)*(e.r+16)-2,e.y+Math.sin(a)*(e.r+16)-2,4,4)}
-  drawEye(e.x,e.y,e.r,e.t*2,e.flash);ctx.restore()}
-/* boots scrub */
-let scrub=null;
-$('scrubImg').src=DOLL;
-function scrubLeft(x){const d=x.getImageData(0,0,260,130).data;let n=0;for(let i=3;i<d.length;i+=16)if(d[i]>40)n++;return n}
-function scrubThen(cb){
-  if((G.dirt||0)<2){cb();return}
-  G.mode='scrub';const c=$('scrubC'),x=c.getContext('2d');c.width=260;c.height=130;x.globalCompositeOperation='source-over';x.clearRect(0,0,260,130);
-  const n=Math.min(44,6+Math.round(G.dirt*3));
-  for(let i=0;i<n;i++){const left=Math.random()<.5,px=((left?.17:.56)+Math.random()*.26)*260,py=(.40+Math.random()*.54)*130,r=4+Math.random()*9;
-    x.fillStyle=pick(['rgba(28,8,20,.92)','rgba(60,92,40,.88)','rgba(96,18,40,.88)']);x.beginPath();x.ellipse(px,py,r,r*.7,Math.random()*3,0,TAU);x.fill();
-    if(Math.random()<.2){x.fillStyle='#e9e2d0';x.beginPath();x.arc(px,py,3.2,0,TAU);x.fill();x.fillStyle='#b01030';x.beginPath();x.arc(px,py,1.4,0,TAU);x.fill()}}
-  scrub={cb,total:Math.max(1,scrubLeft(x)),pct:0,last:0};$('scrubPct').textContent='Чистота: 0%';$('scrub').classList.remove('hide')}
-(function(){const c=$('scrubC');let dn=0;
-  const wipe=e=>{if(!scrub)return;const r=c.getBoundingClientRect(),x=c.getContext('2d');x.globalCompositeOperation='destination-out';x.beginPath();x.arc((e.clientX-r.left)/r.width*260,(e.clientY-r.top)/r.height*130,17,0,TAU);x.fill();
-    const t=performance.now();if(t-scrub.last>120){scrub.last=t;scrub.pct=clamp(1-scrubLeft(x)/scrub.total,0,1);$('scrubPct').textContent='Чистота: '+Math.round(scrub.pct*100)+'%'}};
-  c.addEventListener('pointerdown',e=>{try{c.setPointerCapture(e.pointerId)}catch(_){}dn=1;wipe(e);sfx('hit')});c.addEventListener('pointermove',e=>{if(dn)wipe(e)});
-  c.addEventListener('pointerup',()=>dn=0);c.addEventListener('pointercancel',()=>dn=0);
-  $('scrubOk').onclick=()=>{if(!scrub)return;const sc=scrub;scrub=null;const x=c.getContext('2d');sc.pct=clamp(1-scrubLeft(x)/sc.total,0,1);
-    if(sc.pct>=.7){G.cleanN++;G.score+=150}G.dirt=0;$('scrub').classList.add('hide');sc.cb()}
-})();
-function drawExtras2(){
-  const R=G.route;if(R&&G.mode==='play'){ctx.textAlign='center';ctx.fillStyle=R.k==='fall'?'#ffb070':'#ff8ab0';ctx.globalAlpha=.85;fitText((R.k==='fall'?'КУРС: ГДЕ ПАДАЕТ  ':'КУРС: ГДЕ СМОТРЯТ  ')+Math.ceil(R.t),W/2,148,13,300);ctx.globalAlpha=1}
-  const E=G.ev;if(!E)return;
-  if(E.k==='wind'&&E.t>.3&&E.t<8.4){const a=clamp(Math.min(E.t-.3,(8.4-E.t))*1.2,0,1)*(E.t<1.2?.5:1);ctx.save();ctx.strokeStyle='rgba(190,230,255,'+(.35*a)+')';ctx.lineWidth=1.5;
-    for(let i=0;i<30;i++){const x=(((i*97+G.time*260*E.dir)%W)+W)%W,y=(i*61+G.time*150)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+E.dir*34,y+5);ctx.stroke()}
-    ctx.fillStyle='rgba(190,230,255,'+(.8*a)+')';ctx.textAlign='center';ctx.font='bold 26px Georgia';ctx.fillText(E.dir>0?'›››':'‹‹‹',W/2,175);ctx.restore()}
-  if(E.k==='check'&&E.z){const warn=(E.ph===0?E.t<1.8:E.t>2.7&&E.t<4.5)?1:0,p=.5+.5*Math.sin(E.t*14);
-    for(const z of E.z){ctx.save();ctx.strokeStyle='rgba(255,70,120,'+(warn?.5+.4*p:.15)+')';ctx.fillStyle='rgba(255,40,90,'+(warn?.12+.12*p:.04)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(z.x,z.y,z.r,0,TAU);ctx.fill();ctx.stroke();
-      if(E.ph===1&&E.t<3.3)for(let i=0;i<6;i++){ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(z.x+rnd(-60,60),z.y+rnd(-60,60),rnd(4,14),rnd(2,5))}ctx.restore()}}
-}
-function fitText(t,x,y,px,maxW){ctx.font='bold '+px+'px Georgia';const f=Math.min(1,maxW/Math.max(1,ctx.measureText(t).width));ctx.save();ctx.translate(x,y);ctx.scale(f,1);ctx.fillText(t,0,0);ctx.restore()}
-function drawExtras(){
-  const E=G.ev;ctx.textAlign='center';
-  if(E&&E.k==='bort'&&E.t<2.3){const p=.5+.5*Math.sin(E.t*16);ctx.save();
-    ctx.strokeStyle='rgba(255,40,60,'+(.25+.3*p)+')';ctx.lineWidth=2;ctx.setLineDash([10,8]);
-    for(const y of E.ys){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    ctx.setLineDash([]);ctx.fillStyle='rgba(255,50,60,'+(.5+.5*p)+')';
-    for(const y of E.ys)ctx.fillRect(E.real>0||E.t<1.1?W-8:W-8,y-9,8,18);
-    if(E.real<0&&E.t>1.1){ctx.fillStyle='rgba(255,60,210,'+(.12+.2*p)+')';ctx.fillRect(0,0,22,H);for(const y of E.ys)ctx.fillRect(0,y-6,10,12)}
-    ctx.restore()}
-  if(E&&E.k==='silence'&&P&&P.mute>0){ctx.fillStyle='#ff7a9a';fitText('ОГОНЬ ЗАГЛУШЁН',W/2,142,18,300)}
-  const pl=G.plaque;if(pl){const a=clamp(Math.min(pl.t*6,(2.4-pl.t)*2.5),0,1);ctx.save();ctx.globalAlpha=a;ctx.translate(W/2,232-(1-clamp(pl.t*5,0,1))*40);
-    const g=ctx.createLinearGradient(0,-36,0,36);g.addColorStop(0,'#e2bf6a');g.addColorStop(.5,'#9a6f2a');g.addColorStop(1,'#5a3a14');
-    ctx.fillStyle=g;ctx.fillRect(-170,-36,340,72);ctx.strokeStyle='#2a1508';ctx.lineWidth=3;ctx.strokeRect(-170,-36,340,72);
-    ctx.fillStyle='#2a1508';for(const[x,y]of[[-160,-26],[160,-26],[-160,26],[160,26]]){ctx.beginPath();ctx.arc(x,y,3,0,TAU);ctx.fill()}
-    ctx.fillStyle='#3a1a0a';fitText(pl.a,0,-14,13,300);ctx.fillStyle='#1a0808';fitText(pl.b,0,12,26,310);ctx.fillStyle='#4a2410';fitText(pl.c,0,30,12,310);ctx.restore()}
-  if(P&&P.ord&&G.mode==='play'){ctx.fillStyle='#ffdf94';ctx.globalAlpha=.85;fitText(ORDERS[P.ord.k].n+'  '+Math.ceil(P.ord.t),W/2,128,14,300);ctx.globalAlpha=1}
-  if(G.counter>0){const a=clamp(G.counter*1.6,0,1),k=clamp((1.6-G.counter)/.14,0,1);ctx.save();ctx.translate(W/2,H/2+95);ctx.rotate(.1);ctx.scale(1.3-.3*k,1.3-.3*k);ctx.globalAlpha=a;
-    ctx.strokeStyle='#ff2a44';ctx.lineWidth=6;ctx.strokeRect(-190,-52,380,104);ctx.fillStyle='#ff2a44';fitText('ВОЗРАЖЕНИЕ',0,-6,46,350);fitText('ОТКЛОНЕНО',0,36,40,350);ctx.restore()}
-  const C=G.crew;if(C){const p=.5+.5*Math.sin(C.t*10);
-    if(C.t>.8&&C.t<4){ctx.fillStyle='rgba(90,0,120,'+(.18+.2*p)+')';ctx.fillRect(0,0,W,H);
-      const r=(C.t-.8)*190;ctx.strokeStyle='rgba(200,60,255,.7)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(boss?boss.x:W/2,boss?boss.y+90:250,r,0,TAU);ctx.stroke()}
-    if(C.t>.4&&C.t<5.2){ctx.fillStyle=Math.floor(C.t*6)%2?'#ff4a8a':'#fff';fitText('ПРИКАЗ ЭКИПАЖУ:',W/2,350,22,420);fitText('ПРЕДАТЬ КАПИТАНА',W/2,384,30,430);
-      if(C.t>2.8){ctx.fillStyle='#9fe8ff';fitText('ИСПОЛНИТЕЛЕЙ: 0',W/2,420,22,420)}}}
-}
-function ledgerNotes(){const L=[];
-  if(!G.stampsUsed)L.push('Неизрасходованных распоряжений: все');
-  if(G.hpLost>=220)L.push('Ремонт произведён за счёт будущего экипажа');
-  if(G.rescues>=2&&!G.failed&&!(G.escDmg>0))L.push('Жалоб на условия службы: 0');
-  if(G.kEye>=12)L.push('Независимых наблюдателей уволено: '+G.kEye);
-  if(G.talons>=120)L.push('Заработная плата начислена. Получатели отсутствуют');
-  if(G.kWit)L.push('Заинтересованных зрителей уволено: '+G.kWit);
-  if(G.cleanN)L.push('Демонасов вычищено до блеска: '+G.cleanN+' (+'+G.cleanN*150+')');
-  else if((G.dirt||0)>=8)L.push('Демонасы сданы в грязном виде. Подозреваемый вооружён');
-  if(G.counters)L.push('Возражений отклонено обратным ходом: '+G.counters);
-  return L.length?'<h3>ПРИМЕЧАНИЯ БУХГАЛТЕРИИ</h3>'+L.map(t=>'<div class="row"><span>'+t+'</span></div>').join(''):''}
 function update(dt){
   G.time+=dt;G.t+=dt;G.scroll+=dt*(P.buf.wind>0?1.7:1);
   /* player */
   let dx=0,dy=0;
   if(keys.ArrowLeft||keys.KeyA)dx--;if(keys.ArrowRight||keys.KeyD)dx++;
   if(keys.ArrowUp||keys.KeyW)dy--;if(keys.ArrowDown||keys.KeyS)dy++;
-  const base=275*(G.act===1&&P.buf.wind<=0?.78:1)*(P.buf.wind>0?1.4:1)*(P.ord&&P.ord.k==='ahead'?1.3:1);
+  const base=275*(G.act===1&&P.buf.wind<=0?.78:1)*(P.buf.wind>0?1.4:1);
   if(dx||dy){const l=Math.hypot(dx,dy);P.x+=dx/l*base*dt;P.y+=dy/l*base*dt;P.tx=P.x;P.ty=P.y}
   else{const ddx=P.tx-P.x,ddy=P.ty-P.y,dd=Math.hypot(ddx,ddy),st=Math.min(dd,base*2.6*dt);if(dd>.01){P.x+=ddx/dd*st;P.y+=ddy/dd*st}}
   P.x=clamp(P.x,36,W-36);P.y=clamp(P.y,110,H-50);if(!(dx||dy)){P.tx=clamp(P.tx,36,W-36);P.ty=clamp(P.ty,110,H-50)}
   P.moved=Math.hypot(P.x-P.px,P.y-P.py)>.45;P.px=P.x;P.py=P.y;
   P.inv=Math.max(0,P.inv-dt);P.flick+=dt;
   for(const k in P.buf)if(P.buf[k]>0){P.buf[k]-=dt;if(P.buf[k]<=0){P.buf[k]=0;popText(P.x,P.y-50,BUFFS[k].n+' — КОНЕЦ','#aaa')}}
-  extrasTick(dt);{const g0=histAt(1.5),g1=histAt(3);P.dr[0].x=g0.x;P.dr[0].y=g0.y;P.dr[1].x=g1.x;P.dr[1].y=g1.y}
-  P.fire-=dt;if(P.fire<=0&&!(boss&&boss.phase===3)&&!(P.mute>0)){P.fire=(P.buf.rapid>0?.085:.15)*fireMul();shoot()}
+  P.dr[0].x=lerp(P.dr[0].x,P.x-52,1-Math.pow(.001,dt));P.dr[0].y=lerp(P.dr[0].y,P.y+16,1-Math.pow(.001,dt));
+  P.dr[1].x=lerp(P.dr[1].x,P.x+52,1-Math.pow(.001,dt));P.dr[1].y=lerp(P.dr[1].y,P.y+16,1-Math.pow(.001,dt));
+  P.fire-=dt;if(P.fire<=0&&!(boss&&boss.phase===3)){P.fire=P.buf.rapid>0?.085:.15;shoot()}
   /* director & events */
   director(dt);if(G.mode!=='play')return;updateEscort(dt);if(G.mode!=='play')return;updGaze(dt);if(boss)updBoss(dt);if(G.mode!=='play')return;
   /* player bullets */
@@ -1380,7 +1198,6 @@ function update(dt){
           for(let k=-1;k<=1;k+=2)ebullet(e.x,e.y,an+k*.32,205,5,8,'#ffc66e');
         }else if(G.act===1){for(let k=-1;k<=1;k++)ebullet(e.x,e.y,an+k*.3,195,5,8)}
         else{ebullet(e.x,e.y,an,206,5,9);if(Math.random()<.32){const o=rnd(0,TAU);for(let i=0;i<8;i++)ebullet(e.x,e.y,o+i/8*TAU,130,5,8,'#ff8a3a')}}}
-    }else if(e.kind==='wit'){updWit(e,dt)
     }else if(e.kind==='diver'){
       if(e.state===0){e.y=Math.min(e.y+110*dt,120);e.tx=P.x;e.ty=P.y;if(e.t>1.1){e.state=1;const an=Math.atan2(e.ty-e.y,e.tx-e.x);e.vx=Math.cos(an)*430;e.vy=Math.sin(an)*430;sfx('hit')}}
       else{e.x+=e.vx*dt;e.y+=e.vy*dt;if(e.y>H+60||e.x<-70||e.x>W+70||e.y<-90)e.dead=true}
@@ -1518,7 +1335,6 @@ function drawRock(e){
 }
 function drawEnt(e){
   if(e.kind==='rock')return drawRock(e);
-  if(e.kind==='wit')return drawWit(e);
   if(e.kind==='eye'){
     const pale=e.variant==='mourner',choir=e.variant==='choir';
     ctx.save();ctx.lineCap='round';
@@ -1604,14 +1420,13 @@ function drawShip(){
   ctx.restore();ctx.strokeStyle='#ffd36b';ctx.lineWidth=1.8;ctx.beginPath();ctx.arc(0,0,9,0,TAU);ctx.stroke();
   ctx.restore();
   // drones
-  if(P.buf.wit>0)for(const d of P.dr){ctx.save();ctx.globalAlpha=.34;ctx.fillStyle='#9fd8ff';ctx.strokeStyle='#cfeeff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(d.x,d.y-34);ctx.lineTo(d.x+22,d.y+26);ctx.lineTo(d.x,d.y+16);ctx.lineTo(d.x-22,d.y+26);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
+  if(P.buf.wit>0)for(const d of P.dr){ctx.fillStyle='rgba(255,200,90,.35)';ctx.beginPath();ctx.arc(d.x,d.y,13,0,TAU);ctx.fill();ctx.fillStyle='#ffd98a';ctx.strokeStyle='#8a6a2a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(d.x,d.y,6,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#b8862b';ctx.fillRect(d.x-4,d.y-10,8,4)}
   // shield
   if(P.buf.shield>0){const a=P.buf.shield<2?(Math.floor(G.time*10)%2?.9:.3):.9;ctx.globalAlpha=a;ctx.strokeStyle='#d8e8ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,56,0,TAU);ctx.stroke();ctx.globalAlpha=.16*a;ctx.fillStyle='#bcd8ff';ctx.fill();ctx.globalAlpha=1}
 }
 function drawBullets(){
   for(const b of bullets){
-    if(b.refl){ctx.fillStyle='#ff4057';ctx.beginPath();ctx.arc(b.x,b.y,6,0,TAU);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke()}
-    else if(b.bit){ctx.fillStyle='#b6ff3c';ctx.fillRect(b.x-b.r,b.y-b.r*1.6,b.r*2,b.r*3.2)}
+    if(b.bit){ctx.fillStyle='#b6ff3c';ctx.fillRect(b.x-b.r,b.y-b.r*1.6,b.r*2,b.r*3.2)}
     else{ctx.fillStyle='#ffd36b';ctx.fillRect(b.x-2,b.y-9,4,16);ctx.fillStyle='#fff6d0';ctx.fillRect(b.x-1,b.y-9,2,9);ctx.fillStyle='rgba(255,170,60,.3)';ctx.fillRect(b.x-4,b.y-4,8,14)}}
   for(const b of ebul){ctx.fillStyle=b.col;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();ctx.fillStyle='#fff0d8';ctx.beginPath();ctx.arc(b.x,b.y,b.r*.5,0,TAU);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(b.x,b.y,b.r+1,0,TAU);ctx.stroke()}
 }
@@ -1730,7 +1545,7 @@ function drawHud(){
     ctx.fillStyle='rgba(10,4,12,.85)';ctx.fillRect(bx3,by3,bw2,11);ctx.fillStyle='#8a1a30';ctx.fillRect(bx3,by3,bw2*clamp(fr,0,1),11);ctx.strokeStyle='#c9962b';ctx.lineWidth=2;ctx.strokeRect(bx3,by3,bw2,11);
     ctx.fillStyle='#fff';ctx.font='bold 10px Georgia';ctx.textAlign='center';ctx.fillText(lab,W/2,by3+9)}
 }
-function drawOverlays(){drawExtras();drawExtras2();
+function drawOverlays(){
   for(const t of texts){ctx.globalAlpha=clamp(t.l*1.5,0,1);ctx.fillStyle=t.c;ctx.font='bold 14px Georgia';ctx.textAlign='center';ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.fillText(t.t,t.x,t.y);ctx.shadowBlur=0;ctx.globalAlpha=1}
   if(G.banner){const b=G.banner,a=clamp(Math.min(b.t*5,(b.m-b.t)*2),0,1),jx=(Math.random()-.5)*(b.t<.5?10:2);
     ctx.globalAlpha=a;ctx.textAlign='center';ctx.font='bold 30px Courier New, monospace';
