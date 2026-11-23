@@ -138,6 +138,27 @@ button.quiet{font-size:1.5em;line-height:1.4;padding:.3em .5em;background:none;b
 #say img{width:2em;height:2em}
 #sayTxt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #title .how{font-size:1.26em}
+
+/* v9: visible literary dialogue and truly cinematic scripted interludes */
+#say{top:6.1em;max-height:7.2em;overflow:hidden;background:rgba(11,3,15,.92);font-size:1.47em;border-color:#b8944e;box-shadow:0 0 1.4em #000}
+#sayTxt{display:block;line-height:1.36}
+#cs{gap:.65em;justify-content:flex-end;padding-bottom:3.5em}
+#csTxt{width:100%;box-sizing:border-box;flex-shrink:0;min-height:5.3em;max-height:12em;overflow-y:auto;background:rgba(7,2,11,.87);padding:.55em .75em;border:1px solid rgba(202,157,82,.64);border-radius:.4em;font-size:1.95em;line-height:1.42;max-width:100%}
+#csBtn{min-height:2.65em;flex-shrink:0;font-size:1.45em;max-width:98%;white-space:normal}
+#csImg{max-height:18em}
+@media (max-height:680px){#csTxt{font-size:1.74em;min-height:4.4em}#csImg{max-height:12em}#cs{padding-bottom:1.5em}}
+
+/* v10 unlockable challenge and a discreet original-portrait QA console */
+#hardcoreToggle{font-size:1.3em;padding:.4em .9em;border-color:#b36a58;background:linear-gradient(#6e2531,#3b101c);color:#f1d7ba;box-shadow:0 0 1em rgba(142,21,43,.38);margin-top:.55em}
+#hardcoreToggle[aria-pressed="true"]{background:linear-gradient(#e04445,#731421);color:#ffebd1;border-color:#ecad87}
+#tDoll{cursor:pointer}
+#cheatPanel{z-index:30;gap:.9em;background:rgba(6,3,13,.96)}
+#cheatPanel h2{font:700 2.5em Georgia;color:#e8c46a}
+#cheatPanel p{font-size:1.5em;color:#eadaba;max-width:22em}
+#cheatPanel input{max-width:95%;width:15em;background:#160b19;border:2px solid #b78b57;border-radius:.4em;padding:.65em;color:#f8e7b3;text-align:center;letter-spacing:.22em;font-size:2em;outline-offset:.15em}
+#cheatPanel .btn{font-size:1.45em}
+#cheatResult{min-height:1.25em;margin:.3em}
+#cheatStatus{font:700 1.05em Arial,sans-serif;color:#99f5b3;margin-top:.5em}
 </style>
 </head>
 <body>
@@ -152,19 +173,29 @@ button.quiet{font-size:1.5em;line-height:1.4;padding:.3em .5em;background:none;b
   <button id="btnBomb" class="hide"><span>ПЕЧАТЬ</span><b id="bombN">2</b></button>
 
   <div id="title" class="ov">
-    <button id="versionTag" type="button" aria-label="Новое в версии 7">● v7 · НОВАЯ</button>
+    <button id="versionTag" type="button" aria-label="Новое в версии 10">● v10 · НОВАЯ</button>
     <img id="tDoll" alt="Оригинальная иллюстрация: Эльпис на мостике крейсера">
     <h1>КАПИТАН<br>С ВИЛАМИ</h1>
     <p class="sub">Эльпис и Весть о Бздуне</p>
     <button class="btn" id="go">В ПУТЬ</button>
     <button class="btn small hide" id="goCont">ПРОДОЛЖИТЬ</button>
+    <button class="btn small hide" id="hardcoreToggle" type="button" aria-pressed="false">ХАРДКОР · ВЫКЛЮЧЕН</button>
+    <div class="hide" id="cheatStatus" aria-live="polite">РЕЖИМ ПРОВЕРКИ: БЕССМЕРТИЕ ВКЛЮЧЕНО</div>
     <p id="musicNote">Музыка и сохранённый поход включатся после нажатия «В ПУТЬ» или «ПРОДОЛЖИТЬ».</p>
     <p class="how">Веди палец (или мышь) — крейсер следует за ним. Вилы стреляют сами. <b>Сохрани пустые корабли сопровождения:</b> без них этап не пройти. Кроме Эльписа в экспедиции никого нет.<br>Ловите <b>пиксельные прорывы</b> — это баффы.<br>Кнопка <b>ПЕЧАТЬ</b> (или Пробел) — штамп «Выплачено»: сметает всё.<br>Печать «Выплачено» — редкий спасательный приказ. У финального противника есть особые фазы и мини-испытания. Звук — после нажатия.</p>
   </div>
 
+  <div id="cheatPanel" class="ov hide" role="dialog" aria-label="Секретный корабельный код">
+    <h2>СКРЫТЫЙ ПРИКАЗ</h2>
+    <p>Введите код из капитанского журнала.</p>
+    <input id="cheatInput" type="password" inputmode="numeric" autocomplete="off" placeholder="КОД" maxlength="16" aria-label="Код доступа">
+    <p id="cheatResult" aria-live="polite"></p>
+    <button class="btn small" id="cheatApply" type="button">ПОДТВЕРДИТЬ</button>
+    <button class="btn small" id="cheatCancel" type="button">НАЗАД</button>
+  </div>
   <div id="versionInfo" class="ov hide">
-    <h2>НОВАЯ ВЕРСИЯ · 7</h2>
-    <p>Сюжетные фразы реже и только между опасными атаками. Приказы действительно запускаются. События Чёрного Эфира больше не перебивают сопровождение. Очищай загрязнённый экран в пустом баре вилами или пропускай уборку. Есть сохранение вахты и отдельная музыка.</p>
+    <h2>НОВАЯ ВЕРСИЯ · 10</h2>
+    <p>Вернулись сюжетные реплики и разговоры Эльписа во время боя. Катсцена перед последней фазой сохранена. Финальная пасть защищена во время натиска и уязвима только в определённые окна. Оба QTE требуют своевременного нажатия. В игре больше редких реплик, а после первого прохождения открывается хардкор. Секретный код на иллюстрации Эльписа включает режим бессмертия для тестов. Все акты и сопровождение сохранены.</p>
     <button class="btn small" id="closeVersion">НАЗАД К КАПИТАНУ</button>
   </div>
   <div id="cs" class="ov hide">
@@ -353,6 +384,55 @@ function sfx(n){
 /* ================= game state ================= */
 const G={mode:'title',act:0,t:0,score:0,talons:0,kRock:0,kMon:0,buffs:0,deaths:0,time:0,shake:0,glitch:0,flash:0,stamp:0,banner:null,bitFx:0,god:false,scroll:0,talonBomb:0,rescues:0,failed:0,signal:'',rescuedNames:[],escortGoal:0,pixelJumps:0,qteSuccess:0,stampsUsed:0,kEye:0,kTent:0,kClone:0,hpLost:0,riftT:0,finalStarted:false};
 let P=null,bullets=[],ebul=[],ents=[],tents=[],picks=[],rifts=[],parts=[],texts=[],gaze=null,boss=null,escort=null;
+/* v10 - player choice and permanent completion flag */
+const HARD_UNLOCK_KEY='elpisHardcoreUnlocked';
+const HARD_CHOICE_KEY='elpisHardcoreSelected';
+const RUN_COUNT_KEY='elpisExpeditionCount';
+let hardcoreUnlocked=false,hardcoreChoice=false;
+try{hardcoreUnlocked=localStorage.getItem(HARD_UNLOCK_KEY)==='1';hardcoreChoice=hardcoreUnlocked&&localStorage.getItem(HARD_CHOICE_KEY)==='1'}catch(_e){}
+G.hardcore=hardcoreChoice;
+G.runCount=0;
+function difficultyName(){return G.hardcore?'ХАРДКОР':'ОБЫЧНАЯ ВАХТА'}
+function refreshDifficultyUI(){
+ const b=$('hardcoreToggle');if(!b)return;
+ b.classList.toggle('hide',!hardcoreUnlocked);
+ b.textContent=G.hardcore?'ХАРДКОР · ВКЛЮЧЁН':'ХАРДКОР · ВЫКЛЮЧЕН';
+ b.setAttribute('aria-pressed',String(G.hardcore));
+}
+$('hardcoreToggle').onclick=()=>{
+ if(!hardcoreUnlocked)return;
+ G.hardcore=!G.hardcore;hardcoreChoice=G.hardcore;
+ try{localStorage.setItem(HARD_CHOICE_KEY,G.hardcore?'1':'0')}catch(_e){}
+ refreshDifficultyUI();
+};
+refreshDifficultyUI();
+function unlockHardcore(){
+ hardcoreUnlocked=true;
+ try{localStorage.setItem(HARD_UNLOCK_KEY,'1')}catch(_e){}
+ refreshDifficultyUI();
+}
+/* A hidden in-game QA mode, available from the original character portrait. */
+let cheatSession=false;
+function openCheat(){
+ if(G.mode!=='title')return;
+ $('cheatInput').value='';$('cheatResult').textContent='';
+ $('cheatPanel').classList.remove('hide');$('cheatInput').focus();
+}
+function closeCheat(){$('cheatPanel').classList.add('hide');$('cheatInput').value=''}
+$('tDoll').addEventListener('click',openCheat);
+$('cheatCancel').onclick=closeCheat;
+function applyCheat(){
+ if($('cheatInput').value.trim()!=='333666333'){
+  $('cheatResult').textContent='Код не принят. Подпись не совпала.';
+  $('cheatInput').value='';return;
+ }
+ cheatSession=true;G.god=true;
+ $('cheatStatus').textContent='РЕЖИМ ПРОВЕРКИ: БЕССМЕРТИЕ ВКЛЮЧЕНО';
+ $('cheatStatus').classList.remove('hide');closeCheat();
+}
+$('cheatApply').onclick=applyCheat;
+$('cheatInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyCheat()}if(e.key==='Escape'){e.preventDefault();closeCheat()}});
+
 let D={n:{},done:{},lock:0};
 const ACTS=[{name:'I · ЧЕРНОТА',dur:200},{name:'II · НЕТ ВЕТРА',dur:200},{name:'III · ЧЁРНЫЙ ЭФИР',dur:220},{name:'IV · ОГЛАШЕНИЕ ВЕСТИ',dur:0}];
 
@@ -468,38 +548,51 @@ $('resume').onclick=()=>togglePause();
 $('btnBomb').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();bomb()});
 
 /* ================= dialogue ================= */
-const sayQ=[];let sayT=0,sayGap=0,saidSet=new Set(),lastSayAt=-100,lastBarkAt=-100;
-function fieldCalm(){
-  return G.mode==='play' && !G.ev && !G.crew && !gaze &&
-    !(escort&&escort.active&&escort.grabbed) && !(boss&&boss.state!=='enter'&&boss.state!=='dying') &&
-    ebul.length<=3 && tents.filter(t=>!t.dead&&t.st!=='in').length===0 &&
-    ents.filter(e=>!e.dead&&e.kind!=='rock').length<=2;
+const sayQ=[];let sayT=0,sayGap=0,saidSet=new Set(),lastSayAt=-100,lastBarkAt=-100,lastWasStory=false;
+const heardAt=new Map();
+function fieldCalm(story=false){
+  if(G.mode!=='play')return false;
+  if(story)return !G.crew && (!gaze||gaze.st==='close');
+  return !G.ev&&!G.crew&&!gaze&&!G.plaque &&
+    ebul.length<=14 && tents.filter(t=>!t.dead&&t.st!=='in').length<=2;
 }
 function say(t,pri){
   if(typeof t!=='string'||!t.trim()||G.mode!=='play')return;
-  if(!/^[IV]+ ·/.test(t)&&saidSet.has(t))return;
   const story=!!pri||/^[IV]+ ·/.test(t);
-  // Avoid near-identical lines and repeated incidental remarks throughout a run.
-  if(!story&&G.time-lastBarkAt<23)return;
-  if(!story&&sayQ.length)return;
-  if(!/^[IV]+ ·/.test(t))saidSet.add(t);
-  if(!story)lastBarkAt=G.time;
-  if(story){for(let i=sayQ.length-1;i>=0;i--)if(!sayQ[i].story)sayQ.splice(i,1)}
-  if(sayQ.length>=3)sayQ.shift();
-  sayQ.push({t,story,age:0,life:story?45:16});
+  const previous=heardAt.get(t);
+  if(previous!==undefined&&G.time-previous<(story?28:105))return;
+  if(sayQ.some(q=>q.t===t)||(sayT>0&&$('sayTxt').textContent===t))return;
+  if(!story&&(G.time-lastBarkAt<13||sayQ.filter(q=>!q.story).length>=2))return;
+  // Preserve EVERY important line, including dialogue in the middle of a boss battle.
+  if(sayQ.length>=15){const k=sayQ.findIndex(q=>!q.story);if(k>=0)sayQ.splice(k,1);else if(!story)return}
+  sayQ.push({t,story,age:0});
 }
 function updSay(dt){
-  if(sayGap>0)sayGap-=dt;
-  if(sayT>0){sayT-=dt;if(sayT<=0){$('say').classList.add('hide');sayGap=4.5}return}
+  if(sayGap>0)sayGap=Math.max(0,sayGap-dt);
+  if(sayT>0){sayT-=dt;if(sayT<=0){$('say').classList.add('hide');sayGap=lastWasStory?1.15:1.7}return}
   if(!sayQ.length)return;
-  for(const entry of sayQ)entry.age+=dt;
-  while(sayQ.length&&sayQ[0].age>sayQ[0].life)sayQ.shift();
-  if(!sayQ.length||sayGap>0||!fieldCalm())return;
-  const q=sayQ.shift();$('sayTxt').textContent=q.t;
-  $('say').classList.remove('hide');sayT=Math.min(3.25,1.35+q.t.length*.022);
-  lastSayAt=G.time;
+  for(const q of sayQ)q.age+=dt;
+  for(let i=sayQ.length-1;i>=0;i--)if(!sayQ[i].story&&sayQ[i].age>27)sayQ.splice(i,1);
+  if(!sayQ.length||sayGap>0)return;
+  let idx=sayQ.findIndex(q=>q.story);if(idx<0)idx=0;
+  const q=sayQ[idx];
+  // Critical story dialogue can appear over ordinary combat; only dedicated
+  // interactive events (gaze, scene, QTE) delay it temporarily.
+  if(!fieldCalm(q.story))return;
+  if(!q.story&&G.time-lastBarkAt<13)return;
+  sayQ.splice(idx,1);$('sayTxt').textContent=q.t;
+  $('say').classList.remove('hide');
+  sayT=Math.min(q.story?5.2:3.35,2.1+q.t.length*.026);
+  lastWasStory=q.story;saidSet.add(q.t);heardAt.set(q.t,G.time);
+  lastSayAt=G.time;if(!q.story)lastBarkAt=G.time;
 }
 function clearSay(){sayQ.length=0;sayT=0;sayGap=0;$('say').classList.add('hide')}
+function bossRemark(key,line){
+ if(!boss||G.mode!=='play')return;
+ boss.remarks=boss.remarks||{};
+ if(boss.remarks[key])return;
+ boss.remarks[key]=true;say(line,true);
+}
 
 const ELPIS_HURT=[
  '— Кто утвердил эту пробоину? Не помню такой статьи расходов.',
@@ -526,7 +619,11 @@ const ELPIS_KILL=[
  '— Одним возражением меньше. Занесу в графу «прения».',
  '— Противник выбыл. Выплат не требует, очень удобно.',
  '— Попал. Боцман, подтвердите. — Подтверждаю. — Я тоже.',
- '— Списано в расход. Расход одобрен.'
+ '— Списано в расход. Расход одобрен.',
+ '— Ещё один добровольно покинул ведомость. По причине удара.',
+ '— Вилы утвердили сокращение штата противника.',
+ '— Ушёл без жалованья. Какая экономия.',
+ '— Боцман, записать. — Уже записываю. — Отлично, почерк узнаю.'
 ];
 const ELPIS_NEAR=[
  '— Корпус держится на честном слове. Слово даёт экипаж.',
@@ -542,6 +639,32 @@ const ELPIS_QTEFAIL=[
  '— Приказ не принят. Повторять некому, повторю сам.',
  '— Кто не нажал? — Никто. — Принято, виновный найден.'
 ];
+const ELPIS_REPLAY=[
+ '— Боцман, здесь уже пролетали? — Пролетали. — Так почему место не прибрано?',
+ '— У нас та же чернота. Убедитесь, что это не вчерашняя.',
+ '— Кто переставил крестик? А, я. Прекрасная взаимозаменяемость.',
+ '— Второй рейс. Экипаж опытный, хотя по-прежнему не явился.',
+ '— Снова эти глаза. Знакомые лица, только без лиц.',
+ '— Боцман, прошлый отчёт ещё не сдан. — Я знаю. — Мне тоже известно.',
+ '— Если круг замкнулся, предлагаю объявить его маршрутом.',
+ '— Мне кажется, вчера мы уже победили. Сегодня проверим документально.',
+ '— Прошу не путать повторный рейс с круговой порукой.',
+ '— По протоколу у нас дежавю. Подпись: моя.'
+];
+const ELPIS_MORE_HURT=[
+ '— Пробоину вижу. Кто назначил её на мою смену?',
+ '— Корабль возмущён. Я тоже, но официально.',
+ '— Так, это запишем как несанкционированное знакомство с метеоритом.',
+ '— Ремонтники, к делу! А, сегодня я и ремонтники.',
+ '— Повторяю для протокола: попадания не заказывали.'
+];
+const ELPIS_MORE_KILLS=[
+ '— Противник уничтожен. Основание: препятствовал доставке.',
+ '— Его возражение разлетелось на части. Каждую заверить отдельно.',
+ '— Отлично. Кто подтвердит попадание? Правильно, я.',
+ '— Минус чудовище. Плюс чистая строка в ведомости.',
+ '— Я предупреждал. Может, и не предупреждал. Но обязан был.'
+];
 let _rareAt=0;
 function sayRare(arr,p,gap){const n=performance.now();if(n-_rareAt<Math.max(30000,gap||30000)||Math.random()>(p==null?.3:p)||!fieldCalm())return;_rareAt=n;say(pick(arr))}
 const ELPIS_BUFF=[
@@ -556,13 +679,14 @@ let cs=null,csTimer=null;
 const mapEl=$('mapBox'),mapX=$('mapX'),csTxt=$('csTxt'),csBtn=$('csBtn');
 function cutscene(lines,done,opts){
   opts=opts||{}; G.mode='cut'; clearSay();
-  cs={lines,i:-1,done,typing:false,full:''};
+  clearInterval(csTimer);cs={lines,i:-1,done,typing:false,full:'',opts};
   $('cs').classList.remove('hide'); $('btnBomb').classList.add('hide');
   $('cs').classList.toggle('bar-scene',!!opts.bar);$('sceneTag').classList.toggle('hide',!opts.bar);
   $('cs').style.backgroundImage=opts.bar?'linear-gradient(180deg,rgba(4,2,8,.13),rgba(5,2,8,.22) 42%,rgba(5,2,8,.92) 80%),url('+BAR+')':'linear-gradient(180deg,rgba(5,2,8,.38),rgba(5,2,8,.93) 72%),url('+BG+')';
   mapEl.classList.toggle('hide',!opts.map); mapEl.classList.remove('flip');
   if(opts.map){mapX.style.left=(opts.x0||15)+'%'}
   $('csImg').style.display=opts.map?'none':'';
+  $('cs').setAttribute('aria-label','Сюжетная сцена: '+lines.length+' реплик');
   csNext(true);
 }
 function csNext(first){
@@ -570,23 +694,32 @@ function csNext(first){
   if(cs.typing){clearInterval(csTimer);csTxt.textContent=cs.full;cs.typing=false;return}
   cs.i++; if(cs.i>=cs.lines.length){$('cs').classList.add('hide');const d=cs.done;cs=null;d&&d();return}
   const L=cs.lines[cs.i]; cs.full=L.t; csTxt.className=L.c?'c':'n'; csTxt.textContent='';
-  csBtn.textContent=L.btn||(cs.i===cs.lines.length-1?'Дальше ▸':'Дальше ▸');
+  csBtn.textContent=(L.btn||'ДАЛЬШЕ')+'  ·  '+(cs.i+1)+'/'+cs.lines.length+'  ▸';
   if(L.x!==undefined)mapX.style.left=L.x+'%';
   if(L.flip)mapEl.classList.add('flip');
   let k=0; cs.typing=true; sfx('ui');
-  csTimer=setInterval(()=>{k+=2;csTxt.textContent=cs.full.slice(0,k);if(k>=cs.full.length){clearInterval(csTimer);cs.typing=false}},28);
+  csTimer=setInterval(()=>{if(G.mode!=='cut'||!cs){clearInterval(csTimer);return}k+=3;csTxt.textContent=cs.full.slice(0,k);if(k>=cs.full.length){clearInterval(csTimer);cs.typing=false}},25);
 }
 csBtn.onclick=()=>{audioStart();csNext()};
 $('cs').addEventListener('pointerdown',e=>{if(e.target===$('cs')||e.target.id==='csTxt'||e.target.id==='csImg'){csNext()}});
 
 /* ================= scripts / flow ================= */
 $('go').onclick=()=>{
-  clearSave();saidSet.clear();audioStart(); $('title').classList.add('hide');
+  clearSave();saidSet.clear();heardAt.clear();audioStart(); $('title').classList.add('hide');
+  G.god=cheatSession;G.hardcore=hardcoreChoice&&hardcoreUnlocked;
+  try{G.runCount=(Number(localStorage.getItem(RUN_COUNT_KEY))||0)+1;localStorage.setItem(RUN_COUNT_KEY,String(G.runCount))}
+  catch(_e){G.runCount=(G.runCount||0)+1}
+  refreshDifficultyUI();
   G.score=0;G.talons=0;G.kRock=0;G.kMon=0;G.buffs=0;G.deaths=0;G.time=0;G.rescues=0;G.failed=0;G.signal='';G.rescuedNames=[];G.pixelJumps=0;G.qteSuccess=0;G.stampsUsed=0;G.kEye=0;G.kTent=0;G.kClone=0;G.hpLost=0;G.talonBomb=0;G.riftT=0;G.finalStarted=false;G.escDmg=0;G.counters=0;G.dirt=0;G.cleanN=0;G.kWit=0;G.ordDone=0;G.route=null;
   P=newPlayer();
   cutscene([
     {t:'Эльпис отправился в бескрайнюю черноту — донести Весть о Бздуне туда, где нет света и чужого зрения.'},
     {t:'Взял вилы. Другого объяснения у экспедиции не было.'},
+    ...(G.runCount>1?[
+      {t:'— Боцман, ты же мне это уже говорил.',c:1},
+      {t:'Некоторое время никто не отвечал.'},
+      {t:'— Постой. Мы что, в лупе? Ладно, погнали.',c:1}
+    ]:[]),
     {t:'Экипаж значился в ведомости целиком. На борту был один Эльпис. По документам — полный состав.'},
     {t:'— Отдать швартовы!',c:1},
     {t:'Никто не отдал.'},
@@ -594,16 +727,24 @@ $('go').onclick=()=>{
   ],()=>startAct(0));
 };
 function startAct(i,retry){G.nOrd=0;G.quiet=0;G._b=false;G.ordNext=34+rnd(0,12);G.evN=0;G.evNext=45+rnd(0,9);G.evPool=null;G.mapDone=(i===2?1:0);G.mapAt=65+rnd(0,12);G.route=null;if(G.mode==='mappick')G.mode='play';G.evNext=45+rnd(0,9);G.ev=null;G.plaque=null;G.counter=0;G.crew=null;if(P){P.ord=null;P.heat=0;P.mute=0}
-  G.act=i; G.t=0; G.majorLock=0;D={n:{},done:{},lock:0};
+  G.act=i; G.t=0; G.majorLock=0;D={n:{},done:{},lock:0};G.god=cheatSession;
   bullets=[];ebul=[];ents=[];tents=[];picks=[];rifts=[];parts=[];texts=[];gaze=null;boss=null;escort=null;G.banner=null;G.stamp=0;
-  P.x=P.tx=W/2;P.y=P.ty=H-170;P.inv=2;P.hp=retry?85:Math.min(100,Math.max(P.hp+(i?10:0),i?60:100));P.bombs=retry?Math.max(P.bombs,1):P.bombs; if(i===3&&P.bombs<1)P.bombs=1;
+  const hpBeforeAct=P.hp;
+  P.x=P.tx=W/2;P.y=P.ty=H-170;P.inv=2;P.hp=retry?85:Math.min(100,Math.max(P.hp+(i===3?26:i?10:0),i?60:100));P.bombs=retry?Math.max(P.bombs,1):P.bombs; if(i===3&&P.bombs<1)P.bombs=1;
   for(const k in P.buf)P.buf[k]=0;
   G.mode='play'; $('cs').classList.add('hide'); $('dead').classList.add('hide');
-  saveGame(true);
   ['btnBomb','btnPause','btnMute','btnMusic'].forEach(id=>$(id).classList.remove('hide'));
   if(i===3)initBoss();
   $('signal').classList.add('hide');$('objective').classList.add('hide');
   say(ACTS[i].name,true);
+  if(G.hardcore){banner('ХАРДКОР · '+ACTS[i].name,'НАЧАЛО ВАХТЫ: ПОВЫШЕННАЯ ОПАСНОСТЬ');}
+  if(G.runCount>1&&i===3){say('— Боцман, в прошлый раз рот у черноты уже был? — Был. — Отлично, значит это постоянный клиент.',true)}
+  if(i===3&&!retry&&P.hp>hpBeforeAct){
+    const healed=Math.round(P.hp-hpBeforeAct);
+    popText(P.x,P.y-62,'ПАЁК ПЕРЕД БОЕМ +'+healed,'#b9f3af');
+    banner('ПЕРЕД ОГЛАШЕНИЕМ','ПАЁК +'+healed+' HP');
+  }
+  saveGame(true);
 }
 function actDone(){
   if(escort&&escort.active)return;
@@ -715,7 +856,7 @@ function ending(){
   ],showLedger,{map:1,x0:86});
 }
 function showLedger(){
-  G.mode='ledger';clearSave();
+  G.mode='ledger';unlockHardcore();clearSave();
   const m=Math.floor(G.time/60),s=Math.floor(G.time%60);
   const n=(label,value)=>'<div class="row"><span>'+label+'</span><b>'+value+'</b></div>';
   const points=Math.round(G.score);
@@ -730,6 +871,7 @@ function showLedger(){
     n('Получено повреждений',Math.round(G.hpLost))+
     n('Списаний за счёт бюджета',G.deaths)+n('Время в пути',m+':'+String(s).padStart(2,'0'))+
     n('Источник сигнала',G.signal==='check'?'сверен':G.signal==='take'?'принят':'не установлен')+
+    n('Режим вахты',difficultyName())+n('Проверочный код',G.god?'бессмертие включено':'не использовался')+
     ledgerNotes()+'<h3>ЭКИПАЖ ПО ВЕДОМОСТИ</h3>'+n('Фактически находился на борту','Эльпис')+
     n('Должностей утверждено',CREW_COUNT)+n('Подписи о явке','одна, зато уверенная')+
     '<div class="sig">Выплачено<small>расписался за всех — Эльпис</small></div>';
@@ -741,7 +883,7 @@ function showLedger(){
 $('again').onclick=startCredits;
 $('retry').onclick=()=>{audioStart();P.bombs=Math.max(P.bombs,1);startAct(G.act,true)};
 function die(){
-  if(G.mode!=='play')return;
+  if(G.mode!=='play'||G.god)return;
   G.mode='dead'; G.deaths++; boom(P.x,P.y,50); boom(P.x+10,P.y-10,40); G.shake=24; clearSay();
   const q=['Вахтенный журнал: «Списан за счёт бюджета».','— Если это конец, где жалованье экипажу?','Показания разошлись. Свидетелей больше нет.','Чернота молчала. Вежливо.','Швартовы никто не отдавал — а вот и результат.','— Кто подписал поражение? — Я. Хорошо, хоть почерк знакомый.'];
   $('deadTxt').textContent=pick(q);
@@ -757,7 +899,7 @@ function pixBurst(x,y,n){const pal=['#ff2bd6','#20f0ff','#b6ff3c','#ffffff','#ff
 function popText(x,y,t,c){texts.push({x,y,t,c:c||'#ffe9a0',l:1.1})}
 function banner(a,b){G.banner={a,b,t:0,m:2.4}}
 const aim=(x,y)=>Math.atan2(P.y-y,P.x-x);
-function ebullet(x,y,ang,sp,r,d,col){if(G.route&&G.route.k==='watch')sp*=1.12;if(ebul.length>230)return;ebul.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:r||5,d:d||9,col:col||'#ff4057'})}
+function ebullet(x,y,ang,sp,r,d,col){if(G.hardcore){sp*=1.24;d=(d||9)*1.16;}if(G.route&&G.route.k==='watch')sp*=1.12;if(ebul.length>230)return;ebul.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:r||5,d:d||9,col:col||'#ff4057'})}
 
 /* ================= spawners ================= */
 const RR=[0,14,24,38],RHP=[0,2,5,10],RSC=[0,10,20,40];
@@ -767,14 +909,14 @@ function spawnRock(size,x,y,vx,vy){
 }
 function rockFall(){
   const a=G.act,size=pick(a===2?[1,2,2,3]:[1,2,2,3,3]),x=rnd(30,W-30);
-  const vx=a===1?rnd(-80,80):rnd(-25,25),vy=rnd(70,125)*(size===1?1.25:1)*(P&&P.buf.wind>0?1.15:1);
+  const vx=(a===1?rnd(-80,80):rnd(-25,25))*(G.hardcore?1.18:1),vy=rnd(70,125)*(size===1?1.25:1)*(P&&P.buf.wind>0?1.15:1)*(G.hardcore?1.2:1);
   spawnRock(size,x,-50,vx,vy);
 }
 function spawnEye(x,y,hy,pat,variant){
   variant=variant|| (G.act<1?'watcher':pick(['watcher','watcher','mourner','choir']));
   const small=variant==='choir';
-  ents.push({id:nid(),kind:'eye',variant,r:small?15:variant==='mourner'?20:18,hp:small?4:variant==='mourner'?7:5,max:small?4:variant==='mourner'?7:5,x,y,x0:x,hy:hy||rnd(110,260),vx:0,vy:0,t:0,fq:rnd(.7,1.3),ph:rnd(0,TAU),amp:pat==='still'?0:rnd(40,90),
-    life:rnd(11,15),st:rnd(.8,1.8),rate:G.act===2?1.9:2.3,flash:0,score:small?28:35});
+  ents.push({id:nid(),kind:'eye',variant,r:small?15:variant==='mourner'?20:18,hp:(small?4:variant==='mourner'?7:5)*(G.hardcore?1.2:1),max:(small?4:variant==='mourner'?7:5)*(G.hardcore?1.2:1),x,y,x0:x,hy:hy||rnd(110,260),vx:0,vy:0,t:0,fq:rnd(.7,1.3),ph:rnd(0,TAU),amp:pat==='still'?0:rnd(40,90),
+    life:rnd(11,15),st:rnd(.8,1.8),rate:(G.act===2?1.9:2.3)*(G.hardcore?.82:1),flash:0,score:small?28:35});
 }
 function eyeLine(){const n=ri(2,3),y=-30,gap=rnd(70,110),x0=rnd(100,W-100-gap*(n-1)>100?W-100-gap*(n-1):100);for(let i=0;i<n;i++)spawnEye(x0+i*gap,y-i*30,rnd(120,240))}
 function eyeV(){const cx=rnd(150,W-150);for(let i=-1;i<=1;i++)spawnEye(cx+i*90,-30-Math.abs(i)*50,150+Math.abs(i)*55)}
@@ -830,6 +972,7 @@ function escortFail(){
   $('dead').classList.remove('hide');
 }
 function escortHurt(d){
+  if(G.god)return;
   if(!escort||!escort.active||escort.inv>0||G.mode!=='play')return;
   if(P&&Math.hypot(P.x-escort.x,P.y-escort.y)<95)d*=.58;
   if(escort.hp-d<escort.max*.4)sayRare(ELPIS_ESC,.5,9000);G.escDmg=(G.escDmg||0)+d;escort.hp-=d;escort.inv=.34;escort.grace=0;G.flash=.1;G.shake=Math.max(G.shake,5);
@@ -976,17 +1119,15 @@ function startQte(kind){
   qte={kind,t:0,dur:kind==='launch'?5.2:6.5,pos:0,done:false};
   G.mode='qte';ebul=[];bullets=[];
   $('qte').classList.remove('hide');$('btnBomb').classList.add('hide');
-  $('qteTitle').textContent=kind==='launch'?'ОТДАТЬ ШВАРТОВЫ!':'ЗАВЕРИТЬ ПРИКАЗ!';
-  $('qteText').textContent=kind==='launch'?'Ракета заряжена. Нужно успеть отдать приказ и отпустить механизм. Одно нажатие.':'Стрелка мечется по журналу. Нажми, когда отметка окажется в золотой зоне.';
+  $('qteTitle').textContent=kind==='launch'?'ПУСК РАКЕТЫ!':'ЗАВЕРИТЬ ПРИКАЗ!';
+  $('qteText').textContent=kind==='launch'?'Ракета заряжена. Нажми, когда бегунок войдёт в золотую зону. Один точный приказ.':'Стрелка мечется по журналу. Нажми, когда отметка окажется в золотой зоне.';
   $('qteAction').textContent=kind==='launch'?'ПУСК РАКЕТЫ · E':'ПОСТАВИТЬ ПОДПИСЬ · E';
-  $('qteMeter').style.display=kind==='launch'?'none':'block';$('qteCountdown').textContent='';sfx('warn');
+  $('qteMeter').style.display='block';$('qteCountdown').textContent='';sfx('warn');
 }
 function updateQte(dt){
   if(!qte)return;qte.t+=dt;
-  if(qte.kind==='seal'){
-    qte.pos=(1+Math.sin(qte.t*3.9-Math.PI/2))/2;
-    $('qteNeedle').style.left=(qte.pos*98)+'%';
-  }
+  qte.pos=(1+Math.sin(qte.t*(qte.kind==='launch'?3.15:3.9)-Math.PI/2))/2;
+  $('qteNeedle').style.left=(qte.pos*98)+'%';
   $('qteCountdown').textContent='Осталось '+Math.ceil(Math.max(0,qte.dur-qte.t))+' с';
   if(qte.t>=qte.dur)resolveQte(false);
 }
@@ -1001,15 +1142,40 @@ function resolveQte(success,skipped=false){
     boss.maw.hp=Math.max(1,boss.maw.hp-(success?160:95));
     boom(boss.x,boss.y+80,76);pixBurst(boss.x,boss.y+80,27);
     startMirror();
-    say(success?'— Ракета отправлена. Авиапочта оплачена.':'Приказ запоздал. Ракета всё же полетела: почта дорогу знает.',true);
+    bossRemark('rocket',success?'— Ракета отправлена. Авиапочта оплачена.':'— Отправили не по графику. Ракета всё равно обязана долететь.');
   }else{
-    boss.phase=5;boss.state='fight';boss.t=0;boss.maw.open=1;boss.ring=3;boss.tentT=7;boss.bt=1;
-    if(success){P.inv=Math.max(P.inv,2.4);say('— Подпись моя. Почерк экипажа оставьте экипажу.',true)}
-    else{say(pick(ELPIS_QTEFAIL.concat(['— Кто испачкал журнал? И почему опять мои демонасы?'])),true);boss.ring=.6}
-    banner('ПОСЛЕДНЯЯ ФАЗА','ВОЗРАЖЕНИЯ?');
+    boss.phase=5;boss.state='interlude';boss.t=0;boss.maw.open=0;boss.ring=3;boss.tentT=7;boss.bt=1;
+    G.crew=null;D.crewDone=0;
+    if(success){P.inv=Math.max(P.inv,2.4)}
+    else{boss.ring=.6}
+    beginCrewCutscene(success);
   }
 }
-function commitQte(){if(!qte||G.mode!=='qte')return;resolveQte(qte.kind==='launch'||(qte.pos>=.40&&qte.pos<=.60))}
+function beginCrewCutscene(signed){
+  if(!boss||boss.phase!==5)return;
+  G.crew=null;ebul=[];bullets=[];tents=[];ents=[];
+  G.glitch=.18;G.shake=8;G.bitFx=0;
+  cutscene([
+    {t:signed?'Последний приказ был подписан лично капитаном.':'Подпись немного запоздала. Эльпис счёл это особенностью почерка.'},
+    {t:'Из темноты поднялся приказ, обращённый ко всем людям на мостике. Приказ обещал подчинить экипаж и обратить его против капитана.'},
+    {t:'Чернота вздрогнула. Лампы зажглись красным. Десятки невидимых голосов должны были ответить.'},
+    {t:'Никто не ответил.'},
+    {t:'— Боцман, доложить о потерях!',c:1},
+    {t:'Молчание.'},
+    {t:'— Ни одного. Превосходная дисциплина.',c:1},
+    {t:'Эльпис занёс атаку в графу «несостоявшийся мятеж». И повернулся к огромной пасти.'},
+    {t:'— Теперь возражения принимайте лично. Я и так весь протокол один веду.',c:1,btn:'ПОСЛЕДНЯЯ ФАЗА'}
+  ],()=>{
+    if(!boss||boss.phase!==5)return;
+    D.crewDone=1;G.crew=null;boss.state='fight';boss.t=0;boss.mawCycle=0;boss.mawWindow=false;boss.maw.open=0;
+    boss.spT=0;boss.sp=.15;boss.ring=1.6;boss.tentT=3.9;
+    G.mode='play';P.inv=Math.max(P.inv,1.2);
+    banner('ПОСЛЕДНЯЯ ФАЗА','ПЕРЕЖДИ НАТИСК · ЗАТЕМ БЕЙ В ПАСТЬ');
+    bossRemark('fifthStart','— Пасть закрыта. Ведомость жалоб тоже пока закрыта.');
+    saveGame(true);
+  },{map:false});
+}
+function commitQte(){if(!qte||G.mode!=='qte')return;resolveQte(qte.pos>=.38&&qte.pos<=.62)}
 $('qteAction').onclick=commitQte;
 $('qteSkip').onclick=()=>resolveQte(false,true);
 function startMirror(){
@@ -1018,13 +1184,14 @@ function startMirror(){
   boss.clones=[0,1,2].map((i)=>({x:105+i*135,y:270+(i%2)*40,hp:65,max:65,shot:.85+i*.5,ph:i*1.6,id:nid(),flash:0}));
   G.glitch=.6;
   banner('ЭФИР ПОДДЕЛАЛ ЭКИПАЖ','ТРИ ЧУЖИХ КРЕЙСЕРА');
+  bossRemark('clones','— Три крейсера как мой. И ни у одного не оплачена стоянка.');
 }
 
 /* ================= director ================= */
 function every(key,a,b,t0,t1,fn){
   if(G.t<t0||G.t>t1||D.lock>0||G.ev||G.crew||gaze||G.majorLock>G.t||(G.act===2&&G.t>=145&&!G.signal))return;
   if(D.n[key]===undefined)D.n[key]=t0;
-  if(G.t>=D.n[key]){const f=1-.35*Math.min(1,G.t/(ACTS[G.act].dur||200));fn();D.n[key]=G.t+rnd(a,b)*f}
+  if(G.t>=D.n[key]){const f=1-.35*Math.min(1,G.t/(ACTS[G.act].dur||200));fn();D.n[key]=G.t+rnd(a,b)*f*(G.hardcore?.76:1)}
 }
 function at(key,t,fn){
   if(G.t<t||D.done[key])return;
@@ -1040,35 +1207,41 @@ function director(dt){
   const a=G.act;
   if(D.lock>0)D.lock-=dt;
   if(a===0){
-    at('a',1.5,()=>say('Вокруг была чернота. Буквальная.'));
+    at('a',1.5,()=>say('Вокруг была чернота. Буквальная.',true));
+    at('b',6,()=>say('Без спрятанного чудовища. Пока что бюджет позволял только Эльписа.',true));
+    at('c',14,()=>say('Камни по курсу. Вилы наготове.',true));
+    if(G.runCount>1)at('loopA',38,()=>say(pick(ELPIS_REPLAY),true));
     every('rock',1.5,2.2,3,196,rockFall);
     at('r1',22,()=>spawnRift()); at('r2',95,()=>spawnRift()); at('r3',150,()=>spawnRift());
-    at('e1',46,()=>{say('— Вперёдсмотрящий! Что видишь?');spawnEye(W/2,-30,170,'still')});
+    at('e1',46,()=>{say('— Вперёдсмотрящий! Что видишь?',true);spawnEye(W/2,-30,170,'still')});
     every('eye',8,12,62,190,()=>Math.random()<.5?spawnEye(rnd(80,W-80),-30):eyeLine());
     at('p1',72,()=>spawnPick('ration',rnd(60,W-60),-20)); at('p2',130,()=>spawnPick('ration',rnd(60,W-60),-20));
     at('pb',110,()=>spawnPick('bomb',rnd(60,W-60),-20));
     at('shoes',135,()=>say('— По курсу что-то липкое. Сведения пока засекречены.'));
     at('z',188,()=>say('Прошли. Чернота даже не заметила.'));
-    if(G.t>=ACTS[0].dur&&G.mode==='play')actDone();
+    if(G.t>=ACTS[0].dur&&G.mode==='play'&&!sayQ.some(q=>q.story)&&!(sayT>0&&lastWasStory))actDone();
   }else if(a===1){
-    at('a',1.5,()=>say('Ветра по-прежнему нет. Проверили дважды.'));every('wit',36,52,45,200,witSpawn);
-    at('b',6,()=>say('— Боцман, где попутный?'));
-    at('d',15,()=>say('Мировой кризис только начался, а ветер уже придерживают.'));
+    at('a',1.5,()=>say('Ветра по-прежнему нет. Проверили дважды.',true));every('wit',36,52,45,200,witSpawn);
+    at('b',6,()=>say('— Боцман, где попутный?',true));
+    at('c',10,()=>say('Никто не доложил.',true));
+    if(G.runCount>1)at('loopB',57,()=>say(pick(ELPIS_REPLAY),true));
+    at('d',15,()=>say('Мировой кризис только начался, а ветер уже придерживают.',true));
     every('rock',1.15,1.7,3,196,rockFall);
     every('eye',6.5,9.2,20,190,()=>Math.random()<.55?eyeV():eyeLine());
     at('r1',35,()=>spawnRift()); at('rw',70,()=>spawnRift('wind')); at('r2',125,()=>spawnRift()); at('r3',165,()=>spawnRift());
     at('p1',90,()=>spawnPick('ration',rnd(60,W-60),-20));
     at('pb',120,()=>spawnPick('bomb',rnd(60,W-60),-20));
-    at('ration',45,()=>say('Выдали каждому половину пайка. Пайки лечат вдвое слабее.'));
+    at('ration',45,()=>say('Выдали каждому половину пайка. Пайки лечат вдвое слабее.',true));
     at('t1',108,()=>{say('Щупальце. Не по смете.');spawnTent(Math.random()<.5?-1:1,rnd(280,520))});
     at('escort',118,()=>startEscort('bosun'));
     every('tent',10,14,126,190,()=>spawnTent(Math.random()<.5?-1:1,rnd(270,630)));
-    at('shoes',175,()=>say('— На уборку жалуются. В баре разберёмся.')); 
-    at('z',186,()=>say('Остатков хватило бы на бесконечность.'));
+    at('shoes',175,()=>say('— Кто запачкал мои демонасы?! Вилы, ко мне. Соскребать будем по смете.',true)); 
+    at('z',186,()=>say('Остатков хватило бы на бесконечность.',true));
     every('allyTent',8,11,120,165,()=>{if(escort&&escort.active)spawnTent(escort.x<W/2?-1:1,escort.y,320,4,0,'grasp')});
-    if(G.t>=ACTS[1].dur&&G.mode==='play'&&G.rescues>=1&&!escort?.active)actDone();
+    if(G.t>=ACTS[1].dur&&G.mode==='play'&&G.rescues>=1&&!escort?.active&&!sayQ.some(q=>q.story)&&!(sayT>0&&lastWasStory))actDone();
   }else if(a===2){
-    at('a',1.5,()=>say('Чернота подозрительная. Смотрит — не моргает.'));evDirector();every('wit',44,60,35,200,witSpawn);
+    at('a',1.5,()=>say('Чернота подозрительная. Смотрит — не моргает.',true));
+    if(G.runCount>1)at('loopC',23,()=>say(pick(ELPIS_REPLAY),true));evDirector();every('wit',44,60,35,200,witSpawn);
     every('rock',2.2,3.2,3,216,rockFall);
     every('eye',5.5,8,10,215,()=>Math.random()<.5?eyeV():eyeLine());
     every('diver',6,9,24,215,()=>{const n=ri(1,2);for(let i=0;i<n;i++)spawnDiver()});
@@ -1081,9 +1254,9 @@ function director(dt){
     at('pb',90,()=>spawnPick('bomb',rnd(60,W-60),-20));
     ['g1','g2','g3'].forEach((k,i)=>{const t=[44,112,170][i];
       if(G.t>=t&&!D.done[k]&&!gaze&&!G.ev&&!G.route&&(!escort||!escort.active)&&!G.crew&&G.majorLock<G.t&&ebul.length<9&&tents.length<=1){D.done[k]=1;G.majorLock=G.t+6;ebul=[];startGaze(i===0)}});
-    at('z',210,()=>say('Никто не подглядывал. Показания сходятся.'));
+    at('z',210,()=>say('Никто не подглядывал. Показания сходятся.',true));
     every('allyTent',8,10.5,100,140,()=>{if(escort&&escort.active)spawnTent(escort.x<W/2?-1:1,escort.y,330,4,0,'grasp')});
-    if(G.t>=ACTS[2].dur&&G.mode==='play'&&!gaze&&G.rescues>=2&&!escort?.active&&G.signal)actDone();
+    if(G.t>=ACTS[2].dur&&G.mode==='play'&&!gaze&&G.rescues>=2&&!escort?.active&&G.signal&&!sayQ.some(q=>q.story)&&!(sayT>0&&lastWasStory))actDone();
   }else if(a===3&&boss){
     every('rock',9,12,12,9999,()=>{if(boss&&boss.phase!==3)spawnRock(3,rnd(40,W-40),-50,rnd(-30,30),rnd(80,110))});
     every('rift',26,32,16,9999,()=>{if(boss&&boss.phase!==3)spawnRift()});
@@ -1094,7 +1267,7 @@ function director(dt){
 /* gaze event */
 function startGaze(first){
   gaze={t:0,st:'warn',dmg:0,ok:true};D.lock=6.5;sfx('gaze');
-  if(first)say('— На Чёрном Эфире такое видел. Глаза не поднимать!',true);else say('— Глаза на палубу!',true);
+  if(first)say('— На Чёрном Эфире такое видел. Не подглядывать!',true);else say('— Не подглядывать!',true);
 }
 function updGaze(dt){
   if(!gaze)return;gaze.t+=dt;
@@ -1109,15 +1282,15 @@ function updGaze(dt){
 function initBoss(){
   boss={x:W/2,y:-230,t:0,state:'enter',phase:1,charge:0,clones:[],eyes:[
     {ox:-98,oy:30,hp:180,max:180,id:nid(),f:0,st:1.2},{ox:0,oy:-14,hp:215,max:215,id:nid(),f:0,st:2.0},{ox:98,oy:30,hp:180,max:180,id:nid(),f:0,st:2.8}],
-    maw:{hp:530,max:530,open:0,id:nid(),f:0},ring:4,sp:0,spT:0,spOn:3.2,tentT:6,dyT:0,xp:0,bt:0};
-  setTimeout(()=>{if(boss&&G.mode==='play')say('Место для оглашения подходящее. Слушателей хватит.',true)},800);
-  setTimeout(()=>{if(boss&&G.mode==='play')say('Теперь у темноты есть глаза. За наблюдение я не платил.')},4500);
+    maw:{hp:390,max:390,open:0,id:nid(),f:0},ring:4,sp:0,spT:0,spOn:3.2,tentT:6,dyT:0,xp:0,bt:0};
+  setTimeout(()=>{if(boss&&G.mode==='play'&&G.act===3&&boss.phase===1)say('Для оглашения Вести место подошло.',true)},650);
+  setTimeout(()=>{if(boss&&G.mode==='play'&&G.act===3&&boss.phase===1){banner('ЧЕРНОТА МОЛЧАЛА','НО ТЕПЕРЬ У НЕЁ БЫЛИ ГЛАЗА');bossRemark('opening','— Уважаемые глаза, Весть сейчас будет. Смотреть необязательно, но желательно.')}},4900);
 }
 const eyePos=e=>({x:boss.x+e.ox,y:boss.y+e.oy});
 function bossDie(){
   if(!boss||boss.state==='dying')return;
   boss.state='dying';boss.dyT=0;ebul=[];tents.forEach(t=>{t.st='in'});G.kMon++;
-  say('— Возражений больше нет. Протокол ведёт стена.',true);sfx('boom');
+  clearSay();say('Весть принята единогласно.',true);banner('ПРОТОКОЛ ЗАКРЫТ','ВЕСТЬ ПРИНЯТА ЕДИНОГЛАСНО');sfx('boom');
 }
 function updBoss(dt){
   const B=boss;B.t+=dt;
@@ -1135,10 +1308,15 @@ function updBoss(dt){
     for(const e of B.eyes){if(e.hp<=0)continue;e.st-=dt;if(e.st<=0){e.st=rnd(2.2,2.7)*(alive.length===1?.75:1);const p=eyePos(e),an=aim(p.x,p.y);
       for(let k=-1;k<=1;k++)ebullet(p.x,p.y+14,an+k*.25,166,6,9,'#ff4057')}}
     B.ring-=dt;if(B.ring<=0){B.ring=5.6;const n=12,o=rnd(0,TAU);for(let i=0;i<n;i++)ebullet(B.x,B.y+60,o+i/n*TAU,120,5,8,'#ff8a3a')}
+    if(alive.length===1)bossRemark('lastEye','— Один глаз остался. Боцман, не моргать! — Есть не моргать.');
+    if(G.runCount>1&&B.t>14)bossRemark('phase1Replay','— Опять три глаза. В прошлый рейс вы не предъявили документы.');
     if(!alive.length){startPixelPuzzle()}
     return;
   }
   if(B.phase===3&&B.state==='charge'){
+    if(B.charge<.3)bossRemark('charge','— Ракету заряжаю. Кто-нибудь постреляйте за меня. Ах да, некому.');
+    if(B.charge>8)bossRemark('chargeLate','— Почти готово. Кто торопит — тому самому и запускать.');
+    if(G.runCount>1&&B.charge>4.5)bossRemark('rocketReplay','— Боцман, ты говорил, ракета заряжается быстрее. — В прошлый раз? — Ага. Мы точно в лупе.');
     B.charge+=dt;B.ring-=dt;B.tentT-=dt;
     // Dedicated survival challenge: weapons disabled, pressure ramps gently.
     if(B.ring<=0){B.ring=Math.max(.95,1.5-B.charge*.022);
@@ -1150,6 +1328,8 @@ function updBoss(dt){
     return;
   }
   if(B.phase===4&&B.state==='mirror'){
+    if(B.t>13)bossRemark('cloneLate','— Лжекрейсеры, прекратите копировать меня. У меня и оригинал не утверждён.');
+    if(G.runCount>1&&B.t>9)bossRemark('cloneReplay','— Господа копии! Повторяться разрешено только мне.');
     B.ring-=dt;
     for(const c of B.clones){if(c.hp<=0)continue;
       c.flash=Math.max(0,c.flash-dt);c.x+=Math.sin(B.t*1.8+c.ph)*36*dt;c.x=clamp(c.x,56,W-56);
@@ -1163,17 +1343,21 @@ function updBoss(dt){
     return;
   }
   if(B.phase===5&&!D.crewDone){
-    if(!G.crew){G.crew={t:0,s:0};ebul=[];tents=[];sfx('warn')}
-    const C=G.crew;C.t+=dt;if(C.t>1.4&&C.t<3.4)G.glitch=Math.max(G.glitch,.7);
-    if(C.t>1.4&&C.s===0){C.s=1;sfx('gaze');G.shake=Math.max(G.shake,10)}
-    if(C.t>3.8&&C.s===1){C.s=2;say('— Боцман, доложить о потерях!',true)}
-    if(C.t>5.2&&C.s===2){C.s=3;say('Молчание.',true)}
-    if(C.t>6.4&&C.s===3){C.s=4;say('— Ни одного. Превосходная дисциплина.',true)}
-    if(C.t>8.2){D.crewDone=1;G.crew=null;B.ring=2.5;B.tentT=4}
-    return;
+    // Recovery for a v7/v8 save: never strand a player in an unrendered interlude.
+    beginCrewCutscene(true);return;
   }
   if(B.phase===5){
-    B.maw.open=1;B.spT+=dt;B.bt-=dt;B.tentT-=dt;B.ring-=dt;
+    if(!B.mawBalanced){B.mawBalanced=true;B.maw.max=390;B.maw.hp=Math.min(390,B.maw.hp)}
+    B.mawCycle=(B.mawCycle||0)+dt;
+    const cyc5=B.mawCycle%8.2;
+    if(G.runCount>1&&B.mawCycle>12)bossRemark('lastReplay','— Кто-то снова требует слово. Боцман, поставь очередь. Я уже стою первым.');
+    const vulnerable=cyc5>=3.7&&cyc5<6.65;
+    if(vulnerable!==!!B.mawWindow){
+      B.mawWindow=vulnerable;
+      if(vulnerable){banner('ПАСТЬ РАСКРЫТА','ВИЛЫ К БОЮ · БЕЙ В ЦЕНТР');sfx('warn');bossRemark('firstOpen','— Наконец-то слово предоставлено рту. Пользуюсь.')}
+      else{banner('ПАСТЬ ЗАКРЫТА','УКЛОНЯЙСЯ · ПЕРЕЖДИ НАТИСК');bossRemark('firstClose','— Возражения временно не принимаются. Сохраню вилы для аргументов.')}
+    }
+    B.maw.open=vulnerable?1:0;B.spT+=dt;B.bt-=dt;B.tentT-=dt;B.ring-=dt;
     const cyc=B.spT%5.5;
     if(cyc<3.3){B.sp-=dt;if(B.sp<=0){B.sp=.135;B.xp+=.40;
       for(let k=0;k<2;k++)ebullet(B.x,B.y+105,B.xp+k*Math.PI,144,5,8,k?'#ff8a3a':'#ff4057')}}
@@ -1201,8 +1385,14 @@ function bossHit(b){
       if(c.hp<=0){c.hp=0;boom(c.x,c.y,38);dropTalons(c.x,c.y,6);G.kMon++;G.kClone++}return true;
     }}
   }
-  if(B.phase===5&&B.maw.open>.6&&B.maw.hp>0&&circ(b.x,b.y,b.r,B.x,B.y+105,44)){
-    B.maw.hp-=b.dmg;B.maw.f=.08;G.score++;sfx('hit');if(B.maw.hp<=0)bossDie();return true;
+  if(B.phase===5&&D.crewDone&&B.mawWindow&&B.maw.open>.6&&B.maw.hp>0){
+    const rx=(b.x-B.x)/78,ry=(b.y-(B.y+100))/69;
+    if(rx*rx+ry*ry<=1){
+      B.maw.hp=Math.max(0,B.maw.hp-b.dmg);B.maw.f=.13;G.score++;sfx('hit');
+      if(B.maw.hp<125)bossRemark('weakLast','— Уже почти доставил! Последние возражения прошу оформлять письменно.');
+      if(Math.random()<.2)burst(b.x,b.y,3,'#ff5a7c',90,.25,3);
+      if(B.maw.hp<=0)bossDie();return true;
+    }
   }
   const dx=(b.x-B.x)/150,dy=(b.y-(B.y+10))/118;
   if(dx*dx+dy*dy<1){burst(b.x,b.y,2,'#8a1a30',80,.3,2);return true}
@@ -1221,7 +1411,7 @@ function bomb(){
       if(e.hp===0){const p=eyePos(e);boom(p.x,p.y,44);G.score+=500;G.kMon++}}}
     if(boss.phase===4){for(const c of boss.clones)if(c.hp>0){c.hp-=27;c.flash=.2;
       if(c.hp<=0){c.hp=0;boom(c.x,c.y,35);G.kMon++;G.kClone++}}}
-    if(boss.phase===5&&boss.maw.hp>0){boss.maw.hp-=44;boss.maw.f=.15;if(boss.maw.hp<=0)bossDie()}
+    if(boss.phase===5&&D.crewDone&&boss.mawWindow&&boss.maw.hp>0){boss.maw.hp-=44;boss.maw.f=.15;if(boss.maw.hp<=0)bossDie()}
     // During rocket charging the seal is pure defence, not an instant skip.
   }
 }
@@ -1229,8 +1419,8 @@ function bomb(){
 function hurtP(d){
   if(G.god||P.inv>0||P.buf.shield>0||G.mode!=='play')return;
   if(P.ord&&P.ord.k==='cover')d*=.5;const was=P.hp;P.hp-=d;G.hpLost+=Math.min(d,was);P.inv=1.1;G.shake=12;G.flash=.3;sfx('hurt');burst(P.x,P.y,12,'#ff3b4e',180,.5,4);
-  if(P.hp>0&&P.hp<=18&&!P.nearSaid){P.nearSaid=1;say(pick(ELPIS_NEAR),true)}
-  else if(P.hp>0&&Math.random()<.1)say(pick(P.hp<30?ELPIS_LOW:ELPIS_HURT),true);
+  if(P.hp>0&&P.hp<=18&&!P.nearSaid){P.nearSaid=1;say(pick(ELPIS_NEAR.concat(ELPIS_MORE_HURT)),true)}
+  else if(P.hp>0&&Math.random()<.11)say(pick(P.hp<30?ELPIS_LOW.concat(ELPIS_MORE_HURT):ELPIS_HURT.concat(ELPIS_MORE_HURT)),true);
   if(P.hp<=0){P.hp=0;die()}
 }
 function hurtEnt(e,d){
@@ -1243,7 +1433,7 @@ function killEnt(e){
     if(e.size>1)for(let i=0;i<2;i++)spawnRock(e.size-1,e.x+(i?10:-10),e.y,e.vx+(i?60:-60)+rnd(-20,20),e.vy*rnd(.8,1.2)+rnd(-20,30));
     if(Math.random()<(G.route&&G.route.k==='fall'?.34:.16))dropTalons(e.x,e.y,e.size);
     if(Math.random()<.006&&G.act===0)spawnPick('ration',e.x,e.y);
-  }else{G.kMon++;G.dirt=Math.min(14,(G.dirt||0)+(e.kind==='eye'?1.2:.8));if(e.kind==='wit')G.kWit=(G.kWit||0)+1;sayRare(ELPIS_KILL,.05,45000);if(e.kind==='eye')G.kEye++;dropTalons(e.x,e.y,e.kind==='eye'?3:2);if(Math.random()<.008&&G.act!==1)spawnPick('ration',e.x,e.y);
+  }else{G.kMon++;G.dirt=Math.min(14,(G.dirt||0)+(e.kind==='eye'?1.2:.8));if(e.kind==='wit')G.kWit=(G.kWit||0)+1;sayRare(ELPIS_KILL.concat(ELPIS_MORE_KILLS),.05,45000);if(e.kind==='eye')G.kEye++;dropTalons(e.x,e.y,e.kind==='eye'?3:2);if(Math.random()<.008&&G.act!==1)spawnPick('ration',e.x,e.y);
     if(e.kind==='eye'&&!D.sawEye&&G.act===0){D.sawEye=1;say('Помолчал.',true);say('— Я тоже. Показания сходятся.');say('Записал: «Двое независимых свидетелей».')}}
 }
 function hurtTent(t,d){
@@ -1283,7 +1473,7 @@ function shoot(){
 
 /* ===== progress persistence / audio resume ===== */
 const SAVE_KEY='elpisSaveV7';
-const SAVE_KEYS=['score','talons','kRock','kMon','buffs','deaths','time','rescues','failed','signal','pixelJumps','qteSuccess','stampsUsed','kEye','kTent','kClone','hpLost','talonBomb','escDmg','counters','dirt','cleanN','kWit','ordDone','rescuedNames'];
+const SAVE_KEYS=['score','talons','kRock','kMon','buffs','deaths','time','rescues','failed','signal','pixelJumps','qteSuccess','stampsUsed','kEye','kTent','kClone','hpLost','talonBomb','escDmg','counters','dirt','cleanN','kWit','ordDone','rescuedNames','hardcore','runCount'];
 const SESSION_KEYS=['t','nOrd','quiet','_b','ordNext','evN','evNext','evPool','mapDone','mapAt','route','ev','plaque','counter','crew','majorLock','lastOrd','ordDone','escortGoal'];
 let lastSaveAt=0;
 function saveGame(force=false){
@@ -1306,8 +1496,11 @@ function refreshCont(){const sv=readSave(),b=$('goCont');if(!b)return;
   b.classList.toggle('hide',!sv);if(sv)b.textContent='ПРОДОЛЖИТЬ · АКТ '+['I','II','III','IV'][sv.act]+(sv.full?' · СОХРАНЕНО':'')}
 $('goCont').onclick=()=>{
   const sv=readSave();if(!sv)return;
-  audioStart();$('title').classList.add('hide');saidSet.clear();
-  Object.assign(G,sv.st);P=newPlayer();P.hp=clamp(+sv.hp||85,1,100);P.bombs=clamp(+sv.bombs||1,0,3);
+  audioStart();$('title').classList.add('hide');saidSet.clear();heardAt.clear();
+  Object.assign(G,sv.st);G.hardcore=!!sv.st.hardcore;
+  if(!Number.isFinite(G.runCount)||G.runCount<1)G.runCount=1;
+  hardcoreChoice=G.hardcore;refreshDifficultyUI();G.god=cheatSession;
+  P=newPlayer();P.hp=clamp(+sv.hp||85,1,100);P.bombs=clamp(+sv.bombs||1,0,3);
   startAct(sv.act,true);
   if(sv.full){const f=sv.full;for(const k of SESSION_KEYS)if(f.rt&&k in f.rt)G[k]=f.rt[k];
     P=Object.assign(newPlayer(),f.P||{});P.inv=Math.max(+P.inv||0,1.5);
@@ -1354,9 +1547,10 @@ function extrasTick(dt){
   if(P.ord){P.ord.t-=dt;if(P.ord.t<=0){const k=P.ord.k;P.ord=null;
     if(k==='guns'){P.heat=3;popText(P.x,P.y-50,'ПЕРЕГРЕВ','#ff9a6a')}
     if(!G.ordDone){G.ordDone=1;say('— Приказ выполнен. Подпись моя.')}}}
-  else if(G.act<3&&evOK()&&G.t>=G.ordNext&&G.nOrd<(G.act===1?2:1)&&!(G.act===2&&G.t>92)){
+  else if(G.act<3&&G.mode==='play'&&!boss&&!G.ev&&!G.crew&&!gaze&&!G.plaque&&!G.route&&
+    D.lock<=0&&G.majorLock<=G.t&&G.t>=G.ordNext&&G.nOrd<(G.act===1?2:1)&&!(G.act===2&&G.t>92)){
     const ks=Object.keys(ORDERS).filter(k=>k!==G.lastOrd),k=pick(ks),O=ORDERS[k];G.lastOrd=k;
-    P.ord={k,t:O.d};G.nOrd++;G.ordNext=G.t+65+rnd(0,15);G.majorLock=G.t+O.d+2;G.plaque={t:0,a:'ПРИКАЗ КАПИТАНА',b:O.n,c:O.s};sfx('warn');say(O.say,true)}
+    P.ord={k,t:O.d};G.nOrd++;G.ordNext=G.t+65+rnd(0,15);G.majorLock=G.t+1.5;G.plaque={t:0,a:'ПРИКАЗ КАПИТАНА',b:O.n,c:O.s};sfx('warn');say(O.say,true)}
   evUpdate(dt);routeTick(dt);
   if(G.act<3&&!G.mapDone&&G.t>=G.mapAt&&evOK())showMapPick();
 }
@@ -1409,21 +1603,21 @@ function startEv(k){
 function evUpdate(dt){const E=G.ev;if(!E)return;E.t+=dt;
   if(E.k==='bort'){
     while(E.n<E.ys.length&&E.t>2.3+E.n*.14){spawnRock(1,E.real>0?W+40:-40,E.ys[E.n],-E.real*520,rnd(-10,10));E.n++;if(E.n===1)sfx('boom')}
-    if(E.t>2.3+E.ys.length*.14+2.4){G.ev=null;G.quiet=G.t+4;say(E.real<0?'— Чужой приказ. Подпись не моя.':'— Борт отбит. Возражения списаны.')}
-  }else if(E.k==='silence'){if(E.t>5.6){G.ev=null;say('— Огонь прекращён и возобновлён. Экипаж не возражал.')}}
+    if(E.t>2.3+E.ys.length*.14+2.4){G.ev=null;G.quiet=G.t+4;say(E.real<0?'— Чужой приказ. Подпись не моя.':'— Борт отбит. Возражения списаны.',true)}
+  }else if(E.k==='silence'){if(E.t>5.6){G.ev=null;say('— Огонь прекращён и возобновлён. Экипаж не возражал.',true)}}
   else if(E.k==='tents'){
     const sch=[[.9,-1],[3.6,1],[6.3,-1],[6.9,1]];
     while(E.n<sch.length&&E.t>sch[E.n][0]){spawnTent(sch[E.n][1],rnd(300,560),rnd(220,280),2.5,0,'sweep');E.n++}
-    if(E.t>11.5){G.ev=null;say('— Слева объект, справа объект. Объектов больше, чем экипажа. Рекорд.')}
+    if(E.t>11.5){G.ev=null;say('— Слева объект, справа объект. Объектов больше, чем экипажа. Рекорд.',true)}
   }else if(E.k==='wind'){
     if(!E.s){E.s=1;spawnEye(120,-30,200);spawnEye(W-120,-30,250)}
     if(E.t>1.2&&E.t<7.4){const f=E.dir;P.x=clamp(P.x+f*90*dt,36,W-36);P.tx=clamp(P.tx+f*90*dt,36,W-36);for(const b of ebul)b.vx+=f*75*dt;G.scroll+=dt*.8}
-    if(E.t>8.4){G.ev=null;say('— Ветер был. Кто его заказывал? Никто? Тогда он подозрительный.')}
+    if(E.t>8.4){G.ev=null;say('— Ветер был. Кто его заказывал? Никто? Тогда он подозрительный.',true)}
   }else{
     if(E.t>1.8&&E.f===0){E.f=1;for(const z of E.z)for(let i=0;i<10;i++)ebullet(z.x,z.y,i/10*TAU+rnd(0,.3),140,5,8,'#ff5a8a');sfx('boom')}
     if(E.t>2.7&&E.ph===0){E.ph=1;G.glitch=1;E.z=zonesPick(3);sfx('rift')}
     if(E.t>4.5&&E.f===1){E.f=2;for(const z of E.z)for(let i=0;i<10;i++)ebullet(z.x,z.y,i/10*TAU+rnd(0,.3),140,5,8,'#ff5a8a');sfx('boom')}
-    if(E.t>6.6){G.ev=null;say('— Сигнал проверен. Проверяющий не найден. Результат принят.')}}
+    if(E.t>6.6){G.ev=null;say('— Сигнал проверен. Проверяющий не найден. Результат принят.',true)}}
 }
 function showMapPick(){G.mode='mappick';G.mapDone=1;ebul=[];clearSay();mpMoved=0;$('mpOk').disabled=true;$('mpX').style.left='50%';$('mpX').style.top='50%';$('mpZ1').classList.remove('on');$('mpZ2').classList.remove('on');$('mapPick').classList.remove('hide');sfx('ui')}
 let mpMoved=0,mpPx=.5;
@@ -1548,7 +1742,13 @@ function drawExtras(){
     if(C.t>.8&&C.t<4){ctx.fillStyle='rgba(90,0,120,'+(.18+.2*p)+')';ctx.fillRect(0,0,W,H);
       const r=(C.t-.8)*190;ctx.strokeStyle='rgba(200,60,255,.7)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(boss?boss.x:W/2,boss?boss.y+90:250,r,0,TAU);ctx.stroke()}
     if(C.t>.4&&C.t<5.2){ctx.fillStyle=Math.floor(C.t*6)%2?'#ff4a8a':'#fff';fitText('ПРИКАЗ ЭКИПАЖУ:',W/2,350,22,420);fitText('ПРЕДАТЬ КАПИТАНА',W/2,384,30,430);
-      if(C.t>2.8){ctx.fillStyle='#9fe8ff';fitText('ИСПОЛНИТЕЛЕЙ: 0',W/2,420,22,420)}}}
+      if(C.t>2.8){ctx.fillStyle='#9fe8ff';fitText('ИСПОЛНИТЕЛЕЙ: 0',W/2,420,22,420)}}
+    if(C.t>=3.8){
+      const line=C.t<5.6?'— Боцман, доложить о потерях!':C.t<7.1?'Молчание.':'— Ни одного. Превосходная дисциплина.';
+      ctx.fillStyle='rgba(9,3,16,.91)';ctx.fillRect(25,490,W-50,66);
+      ctx.strokeStyle='#d2ab6b';ctx.lineWidth=1.5;ctx.strokeRect(25,490,W-50,66);
+      ctx.fillStyle='#ffdf9d';fitText(line,W/2,529,20,W-68);
+    }}
 }
 function ledgerNotes(){const L=[];
   if(!G.stampsUsed)L.push('Неизрасходованных распоряжений: все');
@@ -1575,7 +1775,7 @@ function update(dt){
   P.inv=Math.max(0,P.inv-dt);P.flick+=dt;
   for(const k in P.buf)if(P.buf[k]>0){P.buf[k]-=dt;if(P.buf[k]<=0){P.buf[k]=0;popText(P.x,P.y-50,BUFFS[k].n+' — КОНЕЦ','#aaa')}}
   extrasTick(dt);{const g0=histAt(1.5),g1=histAt(3);P.dr[0].x=g0.x;P.dr[0].y=g0.y;P.dr[1].x=g1.x;P.dr[1].y=g1.y}
-  P.fire-=dt;if(P.fire<=0&&!(boss&&boss.phase===3)&&!(P.mute>0)){P.fire=(P.buf.rapid>0?.085:.15)*fireMul();shoot()}
+  P.fire-=dt;if(P.fire<=0&&!(boss&&(boss.phase===3||(boss.phase===5&&!D.crewDone)))&&!(P.mute>0)){P.fire=(P.buf.rapid>0?.085:.15)*fireMul();shoot()}
   /* director & events */
   director(dt);if(G.mode!=='play')return;updateEscort(dt);if(G.mode!=='play')return;updGaze(dt);if(boss)updBoss(dt);if(G.mode!=='play')return;
   /* player bullets */
@@ -1665,8 +1865,8 @@ function update(dt){
     p.x+=p.vx*dt;p.y+=p.vy*dt;
     if(p.y>H+30)p.dead=true;
     else if(dd<34){p.dead=true;
-      if(p.type==='talon'){G.talons++;G.score+=10;G.talonBomb++;if(G.talonBomb>=65){if(P.bombs<3){G.talonBomb=0;P.bombs++;popText(P.x,P.y-40,'+ПЕЧАТЬ','#ff8a9a');if(Math.random()<.55)say(pick(ELPIS_STAMP))}else G.talonBomb=65}sfx('hit')}
-      else if(p.type==='ration'){const h=G.act===1?12:18;P.hp=Math.min(100,P.hp+h);popText(P.x,P.y-40,(G.act===1?'ПОЛПАЙКА +':'ПАЁК +')+h,'#9fe89a');if(Math.random()<.55)say(pick(ELPIS_HEAL),true);sfx('pick')}
+      if(p.type==='talon'){G.talons++;G.score+=10;G.talonBomb++;if(G.talonBomb>=(G.hardcore?90:65)){if(P.bombs<3){G.talonBomb=0;P.bombs++;popText(P.x,P.y-40,'+ПЕЧАТЬ','#ff8a9a');if(Math.random()<.55)say(pick(ELPIS_STAMP))}else G.talonBomb=(G.hardcore?90:65)}sfx('hit')}
+      else if(p.type==='ration'){const h=G.hardcore?(G.act===1?9:13):(G.act===1?12:18);P.hp=Math.min(100,P.hp+h);popText(P.x,P.y-40,(G.act===1?'ПОЛПАЙКА +':'ПАЁК +')+h,'#9fe89a');if(Math.random()<.55)say(pick(ELPIS_HEAL),true);sfx('pick')}
       else if(p.type==='bomb'){P.bombs=Math.min(3,P.bombs+1);popText(P.x,P.y-40,'+ПЕЧАТЬ','#ff8a9a');if(Math.random()<.3)say(pick(ELPIS_STAMP));sfx('pick')}}
   }
   /* rifts */
@@ -1863,6 +2063,15 @@ function drawBoss(){
   ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#a01c34';ctx.lineWidth=3;ctx.shadowColor='#c4182e';ctx.shadowBlur=18;ctx.stroke();ctx.shadowBlur=0;
   // maw
   const M=B.maw,mx=B.x,my=B.y+105,op=M.open;
+  if(B.phase===5&&D.crewDone&&M.hp>0){
+    ctx.save();ctx.strokeStyle=B.mawWindow?'rgba(255,113,143,'+(.67+.28*Math.sin(t*7))+')':'rgba(134,185,231,'+(.35+.18*Math.sin(t*5))+')';
+    ctx.shadowColor=B.mawWindow?'#ff426b':'#56addb';ctx.shadowBlur=18;ctx.lineWidth=3;
+    ctx.beginPath();ctx.ellipse(B.x,B.y+100,78,68,0,0,TAU);ctx.stroke();
+    if(!B.mawWindow){ctx.fillStyle='rgba(80,145,200,.17)';ctx.fill()}
+    ctx.font='bold 13px Georgia';ctx.textAlign='center';ctx.fillStyle=B.mawWindow?'#ffd2cf':'#a4d5f9';
+    ctx.fillText(B.mawWindow?'УЯЗВИМА':'ЗАЩИТА',B.x,B.y+190);
+    ctx.restore();
+  }
   if(M.hp>0||B.state==='dying'){
     ctx.save();ctx.translate(mx,my);
     const w=62,h=6+op*30;
@@ -1909,7 +2118,7 @@ function drawHud(){
   ctx.fillStyle='rgba(10,4,12,.8)';ctx.fillRect(x-3,y-3,w+6,h+6);
   const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#b0182c');g.addColorStop(1,f>.45?'#e8a43a':'#ff3b4e');
   ctx.fillStyle=g;ctx.fillRect(x,y,w*f,h);ctx.strokeStyle='#c9962b';ctx.lineWidth=2;ctx.strokeRect(x-3,y-3,w+6,h+6);
-  ctx.fillStyle='#fff';ctx.font='bold 11px Georgia';ctx.fillText('ПАЁК',x+5,y+12);
+  ctx.fillStyle='#fff';ctx.font='bold 11px Georgia';ctx.fillText(G.hardcore?'ПАЁК · H':'ПАЁК',x+5,y+12);
   // bombs
   for(let i=0;i<P.bombs;i++){ctx.fillStyle='#b0182c';ctx.strokeStyle='#ffd36b';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x+8+i*18,y+h+17,6.5,0,TAU);ctx.fill();ctx.stroke()}
   // route strip
@@ -1944,7 +2153,7 @@ function drawHud(){
     else if(boss.phase===2){fr=.6;lab='II · ПИКСЕЛЬНЫЙ ПРОЛОМ'}
     else if(boss.phase===3){fr=clamp(boss.charge/12,0,1);lab='III · РАКЕТА: НЕ СТРЕЛЯТЬ · '+Math.floor(fr*100)+'%'}
     else if(boss.phase===4){fr=boss.clones.reduce((a,c)=>a+Math.max(0,c.hp),0)/(65*3);lab='IV · ЛОЖНЫЙ ЭКИПАЖ'}
-    else{fr=boss.maw.hp/boss.maw.max;lab='V · ВОЗРАЖЕНИЯ?'}
+    else{fr=boss.maw.hp/boss.maw.max;lab=D.crewDone?'V · '+(boss.mawWindow?'БЕЙ В ПАСТЬ':'УКЛОНЯЙСЯ · ЗАЩИТА')+' · '+Math.ceil(Math.max(0,boss.maw.hp))+' HP':'V · КОМАНДА БЕЗ ЭКИПАЖА'}
     ctx.fillStyle='rgba(10,4,12,.85)';ctx.fillRect(bx3,by3,bw2,11);ctx.fillStyle='#8a1a30';ctx.fillRect(bx3,by3,bw2*clamp(fr,0,1),11);ctx.strokeStyle='#c9962b';ctx.lineWidth=2;ctx.strokeRect(bx3,by3,bw2,11);
     ctx.fillStyle='#fff';ctx.font='bold 10px Georgia';ctx.textAlign='center';ctx.fillText(lab,W/2,by3+9)}
 }
