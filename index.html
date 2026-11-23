@@ -173,7 +173,7 @@ button.quiet{font-size:1.5em;line-height:1.4;padding:.3em .5em;background:none;b
   <button id="btnBomb" class="hide"><span>ПЕЧАТЬ</span><b id="bombN">2</b></button>
 
   <div id="title" class="ov">
-    <button id="versionTag" type="button" aria-label="Новое в версии 10">● v10 · НОВАЯ</button>
+    <button id="versionTag" type="button" aria-label="Новое в версии 12">● v12 · НОВАЯ</button>
     <img id="tDoll" alt="Оригинальная иллюстрация: Эльпис на мостике крейсера">
     <h1>КАПИТАН<br>С ВИЛАМИ</h1>
     <p class="sub">Эльпис и Весть о Бздуне</p>
@@ -191,11 +191,12 @@ button.quiet{font-size:1.5em;line-height:1.4;padding:.3em .5em;background:none;b
     <input id="cheatInput" type="password" inputmode="numeric" autocomplete="off" placeholder="КОД" maxlength="16" aria-label="Код доступа">
     <p id="cheatResult" aria-live="polite"></p>
     <button class="btn small" id="cheatApply" type="button">ПОДТВЕРДИТЬ</button>
+    <button class="btn small hide" id="cheatDisable" type="button">ОТМЕНИТЬ БЕССМЕРТИЕ</button>
     <button class="btn small" id="cheatCancel" type="button">НАЗАД</button>
   </div>
   <div id="versionInfo" class="ov hide">
-    <h2>НОВАЯ ВЕРСИЯ · 10</h2>
-    <p>Вернулись сюжетные реплики и разговоры Эльписа во время боя. Катсцена перед последней фазой сохранена. Финальная пасть защищена во время натиска и уязвима только в определённые окна. Оба QTE требуют своевременного нажатия. В игре больше редких реплик, а после первого прохождения открывается хардкор. Секретный код на иллюстрации Эльписа включает режим бессмертия для тестов. Все акты и сопровождение сохранены.</p>
+    <h2>НОВАЯ ВЕРСИЯ · 12</h2>
+    <p>Фокусированный огонь пробивает броню каждого глаза. Если сменить цель или увести линию огня, трещина закрывается. В финале пасть раскрывается с предупреждением, без синего щита. Условные заметки в журнале сохранены. Новых обязательных мини-игр нет.</p>
     <button class="btn small" id="closeVersion">НАЗАД К КАПИТАНУ</button>
   </div>
   <div id="cs" class="ov hide">
@@ -416,17 +417,19 @@ let cheatSession=false;
 function openCheat(){
  if(G.mode!=='title')return;
  $('cheatInput').value='';$('cheatResult').textContent='';
+ $('cheatDisable').classList.toggle('hide',!cheatSession);
  $('cheatPanel').classList.remove('hide');$('cheatInput').focus();
 }
 function closeCheat(){$('cheatPanel').classList.add('hide');$('cheatInput').value=''}
 $('tDoll').addEventListener('click',openCheat);
 $('cheatCancel').onclick=closeCheat;
+$('cheatDisable').onclick=()=>{cheatSession=false;G.god=false;$('cheatStatus').classList.add('hide');$('cheatResult').textContent='Бессмертие отменено. Вахта проходит в обычном порядке.';$('cheatDisable').classList.add('hide');};
 function applyCheat(){
  if($('cheatInput').value.trim()!=='333666333'){
   $('cheatResult').textContent='Код не принят. Подпись не совпала.';
   $('cheatInput').value='';return;
  }
- cheatSession=true;G.god=true;
+ cheatSession=true;G.god=true;G.cheatSpeechCursor=0;
  $('cheatStatus').textContent='РЕЖИМ ПРОВЕРКИ: БЕССМЕРТИЕ ВКЛЮЧЕНО';
  $('cheatStatus').classList.remove('hide');closeCheat();
 }
@@ -548,7 +551,7 @@ $('resume').onclick=()=>togglePause();
 $('btnBomb').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();bomb()});
 
 /* ================= dialogue ================= */
-const sayQ=[];let sayT=0,sayGap=0,saidSet=new Set(),lastSayAt=-100,lastBarkAt=-100,lastWasStory=false;
+const sayQ=[];let sayT=0,sayGap=0,saidSet=new Set(),lastSayAt=-100,lastBarkAt=-100,lastWasStory=false,lastWasFeatured=false;
 const heardAt=new Map();
 function fieldCalm(story=false){
   if(G.mode!=='play')return false;
@@ -556,37 +559,47 @@ function fieldCalm(story=false){
   return !G.ev&&!G.crew&&!gaze&&!G.plaque &&
     ebul.length<=14 && tents.filter(t=>!t.dead&&t.st!=='in').length<=2;
 }
-function say(t,pri){
-  if(typeof t!=='string'||!t.trim()||G.mode!=='play')return;
+function say(t,pri,options){
+  if(typeof t!=='string'||!t.trim()||G.mode!=='play')return false;
+  t=cheatSpeak(t);
   const story=!!pri||/^[IV]+ ·/.test(t);
+  const featured=!!(options&&options.featured); // first sighting, first hit: must speak even in a barrage
+  const bark=!!(options&&options.bark); // optional but selected: never expire while waiting for a pause
   const previous=heardAt.get(t);
-  if(previous!==undefined&&G.time-previous<(story?28:105))return;
-  if(sayQ.some(q=>q.t===t)||(sayT>0&&$('sayTxt').textContent===t))return;
-  if(!story&&(G.time-lastBarkAt<13||sayQ.filter(q=>!q.story).length>=2))return;
-  // Preserve EVERY important line, including dialogue in the middle of a boss battle.
-  if(sayQ.length>=15){const k=sayQ.findIndex(q=>!q.story);if(k>=0)sayQ.splice(k,1);else if(!story)return}
-  sayQ.push({t,story,age:0});
+  if(previous!==undefined&&G.time-previous<(story?28:105))return false;
+  if(sayQ.some(q=>q.t===t)||(sayT>0&&$('sayTxt').textContent===t))return false;
+  if(!story&&!featured&&!bark&&(G.time-lastBarkAt<13||sayQ.filter(q=>!q.story).length>=2))return false;
+  // Keep literary dialogue and guaranteed first reactions. Only discard ordinary filler on overflow.
+  if(sayQ.length>=20){
+    const k=sayQ.findIndex(q=>!q.story&&!q.featured&&!q.bark);
+    if(k>=0)sayQ.splice(k,1);
+    else if(!story&&!featured)return false;
+  }
+  sayQ.push({t,story,featured,bark,age:0});return true;
 }
 function updSay(dt){
   if(sayGap>0)sayGap=Math.max(0,sayGap-dt);
-  if(sayT>0){sayT-=dt;if(sayT<=0){$('say').classList.add('hide');sayGap=lastWasStory?1.15:1.7}return}
+  if(sayT>0){sayT-=dt;if(sayT<=0){$('say').classList.add('hide');sayGap=lastWasStory?1.05:1.25}return}
   if(!sayQ.length)return;
   for(const q of sayQ)q.age+=dt;
-  for(let i=sayQ.length-1;i>=0;i--)if(!sayQ[i].story&&sayQ[i].age>27)sayQ.splice(i,1);
+  for(let i=sayQ.length-1;i>=0;i--)
+    if(!sayQ[i].story&&!sayQ[i].featured&&!sayQ[i].bark&&sayQ[i].age>27)sayQ.splice(i,1);
   if(!sayQ.length||sayGap>0)return;
-  let idx=sayQ.findIndex(q=>q.story);if(idx<0)idx=0;
+  let idx=sayQ.findIndex(q=>q.story);
+  if(idx<0)idx=sayQ.findIndex(q=>q.featured);
+  if(idx<0)idx=0;
   const q=sayQ[idx];
-  // Critical story dialogue can appear over ordinary combat; only dedicated
-  // interactive events (gaze, scene, QTE) delay it temporarily.
-  if(!fieldCalm(q.story))return;
-  if(!q.story&&G.time-lastBarkAt<13)return;
+  // Story always wins. The FIRST reaction is guaranteed even in dense bullet patterns.
+  // Subsequent casual remarks wait for calmer moments, but a selected bark is not deleted.
+  if(!q.featured&&!fieldCalm(q.story))return;
+  if(!q.story&&!q.featured&&G.time-lastBarkAt<13)return;
   sayQ.splice(idx,1);$('sayTxt').textContent=q.t;
   $('say').classList.remove('hide');
-  sayT=Math.min(q.story?5.2:3.35,2.1+q.t.length*.026);
-  lastWasStory=q.story;saidSet.add(q.t);heardAt.set(q.t,G.time);
+  sayT=Math.min(q.story?5.2:q.featured?3.5:3.35,2.1+q.t.length*.026);
+  lastWasStory=q.story;lastWasFeatured=q.featured;saidSet.add(q.t);heardAt.set(q.t,G.time);
   lastSayAt=G.time;if(!q.story)lastBarkAt=G.time;
 }
-function clearSay(){sayQ.length=0;sayT=0;sayGap=0;$('say').classList.add('hide')}
+function clearSay(){sayQ.length=0;sayT=0;sayGap=0;lastWasFeatured=false;$('say').classList.add('hide')}
 function bossRemark(key,line){
  if(!boss||G.mode!=='play')return;
  boss.remarks=boss.remarks||{};
@@ -673,12 +686,153 @@ const ELPIS_BUFF=[
  '— Если оно мигает, значит, это не ошибка, а улучшение.'
 ];
 
+// v11: unique first-time reactions. A rare reaction is chosen once per run; no cycling
+// through the same three catchphrases over and over. Values are saved with the expedition.
+const ELPIS_FIRST_BARKS={
+  hurt:'— Боцман, доклад о пробоине! — Пробоина есть. — Кто разрешил? — Никто. — Так и запишем.',
+  rock:'— Первый камень списан. Камень возражений не предъявил.',
+  eye:'— Глаз выбыл. Смотреть надо было в расписание, а не на мой крейсер.',
+  diver:'— Вот и первый любитель прыгать без разрешения. Приземление я ему отменил.',
+  wit:'— Этот запоминал мой путь. Боцман, выдайте ему чистый лист: больше он не запомнит.',
+  tent:'— Щупальце отступило. Восемь претензий, ни одной подписи.',
+  escort:'— Кто царапает корабль сопровождения?! Боцман, разберись. Ах да. Уже разбираюсь.'
+};
+function barkEvent(key,firstLine,pool,chance=.17,cooldown=46){
+  if(G.mode!=='play')return false;
+  const seen=G.barkSeen||(G.barkSeen={});
+  const used=G.barkLines||(G.barkLines=[]);
+  if(!seen[key]){
+    // First-time reaction is guaranteed and may play over intensive combat.
+    if(say(firstLine||ELPIS_FIRST_BARKS[key],false,{featured:true})){
+      seen[key]=true;G.nextBarkAt=Math.max(G.nextBarkAt||0,G.time+32);return true;
+    }
+    return false;
+  }
+  if(G.time<(G.nextBarkAt||0)||Math.random()>chance)return false;
+  const available=(pool||[]).filter(t=>!used.includes(t));
+  if(!available.length)return false;
+  const line=pick(available);
+  if(!say(line,false,{bark:true}))return false;
+  used.push(line);G.nextBarkAt=G.time+cooldown;return true;
+}
+
+
+/* Hidden alternate dialogue for the QA-only invulnerability code.
+   Ordinary expeditions and the original script are unaffected. */
+const CHEAT_SPEECHES=[
+ '— Боцман, чем пахнет? — Скатолом. — Кто назначил его в машинное отделение?',
+ '— Демонасы на палубу! Нет, палубу под демонасы. Записать точно.',
+ '— Кто положил бородавочника в штурманский сундук? Он же без карты.',
+ '— Бабирусса. Название красивое. Бивни не укладываются в смету.',
+ '— Кистеухая свинья по правому борту. Офицер, запишите: кисти имеются, ушей достаточно.',
+ '— Лесной кабан пахнет лесом. Некоторые хряки пахнут хуже. Причину выяснит бухгалтерия.',
+ '— Отдел провианта спрашивает про андростенон. Я спрашиваю, кто ему выдал пропуск.',
+ '— Свинья речная, свинья лесная, свинья на корабле. Последняя не зарегистрирована.',
+ '— Боцман, демонасы протёрты? — Протёрты. — Тогда чем это всё пахнет?',
+ '— Гигантская лесная свинья влезла бы в камбуз. А камбуз в смету — едва ли.',
+ '— Бородавочник отличается бородавками. Я отличаюсь отсутствием разрешения на бородавки.',
+ '— Кто указал в ведомости девять кабанов? — Я. — Почему девять? — Одного списали.',
+ '— Скребу вилами. Кто выдал вилы? — Я. — Отличная выдача имущества.',
+ '— Бабирусса опять пробила борт своим воображаемым клыком. Пробоина под вопросом.',
+ '— Всем умыться! Особенно тем, кто ещё не явился на корабль.',
+ '— Скатол встречается в запахе мяса некоторых хряков. Вопрос: зачем мясо на мостике?',
+ '— Андростенон, явиться к капитану. Фамилию можно не называть.',
+ '— У бородавочника четыре клыка? У меня вилы. Перевес очевиден.',
+ '— Кистеухий кабан в рубке. Никаких кисточек на моих демонасах.',
+ '— Пожалуйста, уберите копыта из вахтенного журнала. Подписи и без них достаточно.',
+ '— Спорим, кабаны лучше ориентируются? — Не спорим, капитан. — Согласен.',
+ '— Если пахнет болотом, это не навигация. Это обстоятельства.',
+ '— Боцман! Не надо изучать запах. Надо изучать причину его появления.',
+ '— Грязь в иллюминаторе. Значит, кто-то тщательно украсил пустоту.',
+ '— Все кабаны уволены. Ни один не служил. Премий не полагается.',
+ '— Кого вызывают по рации? — Хряка. — А где его подпись? — В грязи.',
+ '— Я приказал демонасам быть чистыми. Они ссылаются на обстоятельства.',
+ '— Африканский бородавочник наверняка не подписал бы эту ведомость. Я подпишу.',
+ '— Бабирусса — имя, как у важного пассажира. Пассажиров нет, билет остаётся.',
+ '— Прошу впредь не путать запах хряка с запахом победы. Второй почище.',
+ '— Мой приказ: никаких свиней на борту. — Есть! — Проверить исполнение.',
+ '— Что за топот в коридоре? — Кабаны, капитан. — Пусть топают по графику.',
+ '— Зачем я считаю копыта, если экипажа нет? — Плановое мероприятие.',
+ '— Снова вонь? Никакого возражения не было: оно само пахнет.',
+ '— Объявляю внеплановый осмотр демонасов. Осматривающий уже прибыл.',
+ '— У кабана есть пятачок. У меня талон. Экономика выравнивается.',
+ '— Боцман, передать всем: чистота — половина пайка. — Принято.',
+ '— Свиньи в темноте не видны. Но бухгалтерия их непременно учтёт.',
+ '— Я сказал: не подглядывать! Особенно кабанам с чрезвычайно любопытным рылом.',
+ '— Признайтесь, кто принёс сюда грязь? — Никого нет. — Подозреваемый установлен.',
+ '— Никакой мистики. Просто хряк, корабль и недобросовестный ветер.',
+ '— Доставить Весть о Бздуне! А копытные пусть распишутся отдельно.',
+ '— В пустоте пахнет отчётностью. Ещё одна причина держать люки закрытыми.',
+ '— Сегодня все посетители бара — кабаны. Но и они, как обычно, не пришли.',
+ '— Пора сменить курс. Куда? — От места, где требуют помыть демонасы.'
+];
+const CHEAT_CUTSCENES={
+ intro:[
+  'Эльпис отправился в черноту, чтобы доставить Весть о Бздуне. По пути был обнаружен подозрительный запах.',
+  '— Боцман, причина? — Кабан. — Какой? — Никакого. — Прекрасно, значит безбилетный.',
+  'На столе лежал список: бородавочник, бабирусса, кистеухая свинья. Автор списка — Эльпис.',
+  '— Отдать швартовы! А потом проверить демонасы. В таком порядке.',
+  'Никто не отдал. Никто не возразил. Экспедиция состоялась.'
+ ],
+ bar0:[
+  'На метеорите стоял бар. В нём никто не сидел, зато у стойки пахло неутверждённой свининой.',
+  '— Уважаемые посетители! Вести о Бздуне и о бородавочниках принимаются здесь!',
+  'Бутылки не ответили. Эльпис записал: «Свиньи от обслуживания отказались».',
+  '— У бабируссы бивни, у меня вилы. Считаю, что за столом нас двое.',
+  'Эльпис протёр демонасы и предъявил бару счёт за уборку.',
+  '— Кто запачкал мои демонасы?! Чистильщик, ко мне! — Я уже пришёл.',
+  'Для правильного курса Эльпис сдвинул крестик на карте. Запах пошёл следом.',
+  'Бар снова остался пустым. Его посещаемость удвоилась по ведомости.'
+ ],
+ bar1:[
+  'Эльпис вернулся в бар: необходимо было официально установить разновидность несуществующего кабана.',
+  '— Боцман, андростенон слышен? — Его чувствуют носом. — Тогда приложить нос к протоколу.',
+  'Скатол и андростенон связаны с неприятным запахом мяса некоторых некастрированных хряков. Эльпис внёс их в экипаж.',
+  '— Кистеухая свинья по левому борту! — Почему кисти? — Понятия не имею, но звучит официально.',
+  'Пайки урезали всем. Посетителей всё равно не оказалось.',
+  'Радио шипело. Пахнуть не умело. В этом отношении эфир проявил выдержку.',
+  '— На Чёрном Эфире видел и похуже. Там один смотрит, а пахнет целый стадион.',
+  'Эльпис закрыл бар собственным распоряжением и сам проверил, что дверь открыта.'
+ ],
+ preboss:[
+  'Метеорит исчез позади. На капитанском мостике остался запах непризнанного бородавочника.',
+  '— Команда! Торжественное молчание! Свиньям явиться отдельно!',
+  'Ни один кабан не прибыл. Все места в зале оказались заняты отсутствующими.',
+  '— Объявляю Весть о Бздуне и смету на очистку демонасов. По порядку!',
+  'Чернота раскрыла глаза. Эльпис осмотрел свои вилы.'
+ ],
+ crew:[
+  'Босс отдал приказ всем членам экипажа. Попасть в ведомость пожелал и бородавочник.',
+  '— Боцман, сколько хряков восстало? — Ни одного. — Идеальная дисциплина.',
+  'Эльпис проверил список копытных: бабирусса, кистеухая свинья, гигантская лесная свинья.',
+  'Ни один не явился. Бунт был отменён по причине отсутствия участников.',
+  '— Ну, тогда откройте пасть! Нужно доставить жалобу на запах лично.'
+ ],
+ ending:[
+  'Эльпис направил корабль в пиксельный разлом. Вахта запаха была завершена.',
+  '— Доклад о кабанах! — Убыли. — Куда? — В отчёт.',
+  'Свиньи не явились. Бабирусса не расписалась. Бородавочник подал возражение заочно.',
+  '— Весть о Бздуне доставлена. А демонасы останутся при мне.',
+  'Никто не возразил. Эльпис поставил печать «Выплачено» и расписался за весь экипаж.'
+ ]
+};
+function cheatSceneLines(lines,opts){
+ if(!cheatSession||!G.god)return lines;
+ const key=opts.scene|| (G.finalStarted?'ending':(boss&&boss.phase===5?'crew':opts.bar?(G.act===0?'bar0':'bar1'):(G.act===2?'preboss':'intro')));
+ const alt=CHEAT_CUTSCENES[key]||CHEAT_CUTSCENES.intro;
+ return lines.map((line,i)=>({...line,t:alt[i%alt.length]}));
+}
+function cheatSpeak(t){
+ if(!cheatSession||!G.god||/^[IV]+ ·/.test(t))return t;
+ const n=Number.isFinite(G.cheatSpeechCursor)?G.cheatSpeechCursor:0;
+ G.cheatSpeechCursor=n+1;return CHEAT_SPEECHES[n%CHEAT_SPEECHES.length];
+}
 
 /* cutscenes */
 let cs=null,csTimer=null;
 const mapEl=$('mapBox'),mapX=$('mapX'),csTxt=$('csTxt'),csBtn=$('csBtn');
 function cutscene(lines,done,opts){
-  opts=opts||{}; G.mode='cut'; clearSay();
+  opts=opts||{};lines=cheatSceneLines(lines,opts); G.mode='cut'; clearSay();
   clearInterval(csTimer);cs={lines,i:-1,done,typing:false,full:'',opts};
   $('cs').classList.remove('hide'); $('btnBomb').classList.add('hide');
   $('cs').classList.toggle('bar-scene',!!opts.bar);$('sceneTag').classList.toggle('hide',!opts.bar);
@@ -710,7 +864,7 @@ $('go').onclick=()=>{
   try{G.runCount=(Number(localStorage.getItem(RUN_COUNT_KEY))||0)+1;localStorage.setItem(RUN_COUNT_KEY,String(G.runCount))}
   catch(_e){G.runCount=(G.runCount||0)+1}
   refreshDifficultyUI();
-  G.score=0;G.talons=0;G.kRock=0;G.kMon=0;G.buffs=0;G.deaths=0;G.time=0;G.rescues=0;G.failed=0;G.signal='';G.rescuedNames=[];G.pixelJumps=0;G.qteSuccess=0;G.stampsUsed=0;G.kEye=0;G.kTent=0;G.kClone=0;G.hpLost=0;G.talonBomb=0;G.riftT=0;G.finalStarted=false;G.escDmg=0;G.counters=0;G.dirt=0;G.cleanN=0;G.kWit=0;G.ordDone=0;G.route=null;
+  G.score=0;G.talons=0;G.kRock=0;G.kMon=0;G.buffs=0;G.deaths=0;G.time=0;G.rescues=0;G.failed=0;G.signal='';G.rescuedNames=[];G.pixelJumps=0;G.qteSuccess=0;G.stampsUsed=0;G.kEye=0;G.kTent=0;G.kClone=0;G.hpLost=0;G.talonBomb=0;G.riftT=0;G.finalStarted=false;G.escDmg=0;G.counters=0;G.dirt=0;G.cleanN=0;G.kWit=0;G.ordDone=0;G.route=null;G.barkSeen={};G.barkLines=[];G.nextBarkAt=0;
   P=newPlayer();
   cutscene([
     {t:'Эльпис отправился в бескрайнюю черноту — донести Весть о Бздуне туда, где нет света и чужого зрения.'},
@@ -724,7 +878,7 @@ $('go').onclick=()=>{
     {t:'— Отдать швартовы!',c:1},
     {t:'Никто не отдал.'},
     {t:'— Правильно. Сначала проверить, привязаны ли.',c:1,btn:'ОТДАТЬ ШВАРТОВЫ (САМОМУ)'}
-  ],()=>startAct(0));
+  ],()=>startAct(0),{scene:'intro'});
 };
 function startAct(i,retry){G.nOrd=0;G.quiet=0;G._b=false;G.ordNext=34+rnd(0,12);G.evN=0;G.evNext=45+rnd(0,9);G.evPool=null;G.mapDone=(i===2?1:0);G.mapAt=65+rnd(0,12);G.route=null;if(G.mode==='mappick')G.mode='play';G.evNext=45+rnd(0,9);G.ev=null;G.plaque=null;G.counter=0;G.crew=null;if(P){P.ord=null;P.heat=0;P.mute=0}
   G.act=i; G.t=0; G.majorLock=0;D={n:{},done:{},lock:0};G.god=cheatSession;
@@ -1219,7 +1373,7 @@ function director(dt){
     at('pb',110,()=>spawnPick('bomb',rnd(60,W-60),-20));
     at('shoes',135,()=>say('— По курсу что-то липкое. Сведения пока засекречены.'));
     at('z',188,()=>say('Прошли. Чернота даже не заметила.'));
-    if(G.t>=ACTS[0].dur&&G.mode==='play'&&!sayQ.some(q=>q.story)&&!(sayT>0&&lastWasStory))actDone();
+    if(G.t>=ACTS[0].dur&&G.mode==='play'&&!sayQ.some(q=>q.story||q.featured)&&!(sayT>0&&(lastWasStory||lastWasFeatured)))actDone();
   }else if(a===1){
     at('a',1.5,()=>say('Ветра по-прежнему нет. Проверили дважды.',true));every('wit',36,52,45,200,witSpawn);
     at('b',6,()=>say('— Боцман, где попутный?',true));
@@ -1238,7 +1392,7 @@ function director(dt){
     at('shoes',175,()=>say('— Кто запачкал мои демонасы?! Вилы, ко мне. Соскребать будем по смете.',true)); 
     at('z',186,()=>say('Остатков хватило бы на бесконечность.',true));
     every('allyTent',8,11,120,165,()=>{if(escort&&escort.active)spawnTent(escort.x<W/2?-1:1,escort.y,320,4,0,'grasp')});
-    if(G.t>=ACTS[1].dur&&G.mode==='play'&&G.rescues>=1&&!escort?.active&&!sayQ.some(q=>q.story)&&!(sayT>0&&lastWasStory))actDone();
+    if(G.t>=ACTS[1].dur&&G.mode==='play'&&G.rescues>=1&&!escort?.active&&!sayQ.some(q=>q.story||q.featured)&&!(sayT>0&&(lastWasStory||lastWasFeatured)))actDone();
   }else if(a===2){
     at('a',1.5,()=>say('Чернота подозрительная. Смотрит — не моргает.',true));
     if(G.runCount>1)at('loopC',23,()=>say(pick(ELPIS_REPLAY),true));evDirector();every('wit',44,60,35,200,witSpawn);
@@ -1256,7 +1410,7 @@ function director(dt){
       if(G.t>=t&&!D.done[k]&&!gaze&&!G.ev&&!G.route&&(!escort||!escort.active)&&!G.crew&&G.majorLock<G.t&&ebul.length<9&&tents.length<=1){D.done[k]=1;G.majorLock=G.t+6;ebul=[];startGaze(i===0)}});
     at('z',210,()=>say('Никто не подглядывал. Показания сходятся.',true));
     every('allyTent',8,10.5,100,140,()=>{if(escort&&escort.active)spawnTent(escort.x<W/2?-1:1,escort.y,330,4,0,'grasp')});
-    if(G.t>=ACTS[2].dur&&G.mode==='play'&&!gaze&&G.rescues>=2&&!escort?.active&&G.signal&&!sayQ.some(q=>q.story)&&!(sayT>0&&lastWasStory))actDone();
+    if(G.t>=ACTS[2].dur&&G.mode==='play'&&!gaze&&G.rescues>=2&&!escort?.active&&G.signal&&!sayQ.some(q=>q.story||q.featured)&&!(sayT>0&&(lastWasStory||lastWasFeatured)))actDone();
   }else if(a===3&&boss){
     every('rock',9,12,12,9999,()=>{if(boss&&boss.phase!==3)spawnRock(3,rnd(40,W-40),-50,rnd(-30,30),rnd(80,110))});
     every('rift',26,32,16,9999,()=>{if(boss&&boss.phase!==3)spawnRift()});
@@ -1282,7 +1436,7 @@ function updGaze(dt){
 function initBoss(){
   boss={x:W/2,y:-230,t:0,state:'enter',phase:1,charge:0,clones:[],eyes:[
     {ox:-98,oy:30,hp:180,max:180,id:nid(),f:0,st:1.2},{ox:0,oy:-14,hp:215,max:215,id:nid(),f:0,st:2.0},{ox:98,oy:30,hp:180,max:180,id:nid(),f:0,st:2.8}],
-    maw:{hp:390,max:390,open:0,id:nid(),f:0},ring:4,sp:0,spT:0,spOn:3.2,tentT:6,dyT:0,xp:0,bt:0};
+    maw:{hp:390,max:390,open:0,id:nid(),f:0},guard:{eye:-1,offset:0,power:0,last:-100,drift:0,breached:false},ring:4,sp:0,spT:0,spOn:3.2,tentT:6,dyT:0,xp:0,bt:0};
   setTimeout(()=>{if(boss&&G.mode==='play'&&G.act===3&&boss.phase===1)say('Для оглашения Вести место подошло.',true)},650);
   setTimeout(()=>{if(boss&&G.mode==='play'&&G.act===3&&boss.phase===1){banner('ЧЕРНОТА МОЛЧАЛА','НО ТЕПЕРЬ У НЕЁ БЫЛИ ГЛАЗА');bossRemark('opening','— Уважаемые глаза, Весть сейчас будет. Смотреть необязательно, но желательно.')}},4900);
 }
@@ -1294,7 +1448,7 @@ function bossDie(){
 }
 function updBoss(dt){
   const B=boss;B.t+=dt;
-  if(B.state==='enter'){B.y=lerp(B.y,185,1-Math.pow(.02,dt));if(B.t>3.2){B.state='fight';B.t=0}return}
+  if(B.state==='enter'){B.y=lerp(B.y,185,1-Math.pow(.02,dt));if(B.t>3.2){B.state='fight';B.t=0;banner('ТРИ ГЛАЗА · ТРИ БРОНИ','УДЕРЖИВАЙ ОГОНЬ В ОДНОЙ ТОЧКЕ');}return}
   if(B.state==='dying'){
     B.dyT+=dt;G.glitch=.6;G.shake=Math.max(G.shake,5);
     if(Math.random()<.2){boom(B.x+rnd(-120,120),B.y+rnd(-80,120),30);pixBurst(B.x+rnd(-100,100),B.y+rnd(-60,100),10)}
@@ -1304,6 +1458,7 @@ function updBoss(dt){
   if(B.state==='pixel')return;
   B.x=W/2+Math.sin(B.t*.55)*(B.phase===1?80:96);B.y=185+Math.sin(B.t*.9)*10;
   if(B.phase===1){
+    updateEyeGuard(B,dt);
     const alive=B.eyes.filter(e=>e.hp>0);
     for(const e of B.eyes){if(e.hp<=0)continue;e.st-=dt;if(e.st<=0){e.st=rnd(2.2,2.7)*(alive.length===1?.75:1);const p=eyePos(e),an=aim(p.x,p.y);
       for(let k=-1;k<=1;k++)ebullet(p.x,p.y+14,an+k*.25,166,6,9,'#ff4057')}}
@@ -1352,6 +1507,8 @@ function updBoss(dt){
     const cyc5=B.mawCycle%8.2;
     if(G.runCount>1&&B.mawCycle>12)bossRemark('lastReplay','— Кто-то снова требует слово. Боцман, поставь очередь. Я уже стою первым.');
     const vulnerable=cyc5>=3.7&&cyc5<6.65;
+    if(cyc5>=2.55&&cyc5<3.7&&!B.mawWarned){B.mawWarned=true;banner('ПАСТЬ ГОТОВИТСЯ РАСКРЫТЬСЯ','СКОРО МОЖНО АТАКОВАТЬ');sfx('warn')}
+    if(cyc5>=6.65||cyc5<2.55)B.mawWarned=false;
     if(vulnerable!==!!B.mawWindow){
       B.mawWindow=vulnerable;
       if(vulnerable){banner('ПАСТЬ РАСКРЫТА','ВИЛЫ К БОЮ · БЕЙ В ЦЕНТР');sfx('warn');bossRemark('firstOpen','— Наконец-то слово предоставлено рту. Пользуюсь.')}
@@ -1368,15 +1525,59 @@ function updBoss(dt){
     return;
   }
 }
+const EYE_GUARD_THRESHOLD=25;
+function resetEyeGuard(B){
+ B.guard={eye:-1,offset:0,power:0,last:-100,drift:0,breached:false};
+}
+function updateEyeGuard(B,dt){
+ const g=B.guard;if(!g||g.eye<0)return;
+ const e=B.eyes[g.eye];
+ if(!e||e.hp<=0){resetEyeGuard(B);return}
+ // Leaving the firing line breaks the lock, even if the player returns to this eye.
+ const misaligned=!P||Math.abs(P.x-(B.x+e.ox+g.offset))>49;
+ g.drift=misaligned?g.drift+dt:Math.max(0,g.drift-dt*2);
+ if(g.drift>.27||B.t-g.last>.73)resetEyeGuard(B);
+}
+function hitBossEye(B,e,i,b){
+ e.hp=Math.max(0,e.hp-b.dmg);e.f=.095;G.score++;sfx('hit');
+ if(Math.random()<.25)burst(b.x,b.y,2,'#ffb27b',70,.22,3);
+ if(e.hp<=0){
+   const pos=eyePos(e);boom(pos.x,pos.y,48);G.score+=500;G.kMon++;G.kEye=(G.kEye||0)+1;dropTalons(pos.x,pos.y,5);
+   say(pick(['— Возражение отклонено. Глаз отдохнёт.','— Глаз выбыл. Следующий, смотрите в очередь.','— Доказательство пробоя принято. Вилы подписали.']),true);
+   resetEyeGuard(B);
+ }
+}
 function bossHit(b){
   const B=boss;if(!B||B.state==='enter'||B.state==='dying')return false;
   if(B.phase===1){
-    for(const e of B.eyes){if(e.hp<=0)continue;const p=eyePos(e);
-      if(circ(b.x,b.y,b.r,p.x,p.y,30)){
-        e.hp-=b.dmg;e.f=.08;sfx('hit');G.score++;
-        if(e.hp<=0){e.hp=0;boom(p.x,p.y,48);G.score+=500;G.kMon++;dropTalons(p.x,p.y,5);
-          say(pick(['Одно возражение снято.','Возражение отклонено.','Показания сошлись.']),true)}return true;
+    B.guard=B.guard||{eye:-1,offset:0,power:0,last:-100,drift:0,breached:false};
+    // Front armor intercepts bullets BEFORE they reach the visible eyes.
+    // Holding fire at the SAME spot on the SAME eye opens a stable passage.
+    // Moving away or switching eyes destroys that progress.
+    const candidates=B.eyes.map((e,i)=>({e,i,p:eyePos(e)}))
+      .filter(o=>o.e.hp>0&&Math.abs(b.x-o.p.x)<35&&b.y>o.p.y-14&&b.y<B.y+140)
+      .sort((a,c)=>Math.abs(b.x-a.p.x)-Math.abs(b.x-c.p.x));
+    if(candidates.length){
+      const {e,i,p}=candidates[0],g=B.guard,offset=b.x-p.x;
+      if(b.fromWitness||b.support){
+        // Reflected witnesses help damage a breached eye but cannot aim-lock it.
+        if(g.eye===i&&g.breached)hitBossEye(B,e,i,b);
+        else burst(b.x,b.y,2,'#a65047',60,.22,2);
+        return true;
       }
+      if(g.eye!==i||Math.abs(offset-g.offset)>35||B.t-g.last>.73){
+        resetEyeGuard(B);B.guard.eye=i;B.guard.offset=offset;B.guard.last=B.t;
+      }
+      const focus=B.guard;
+      focus.last=B.t;focus.drift=0;
+      if(!focus.breached){
+        focus.power=Math.min(EYE_GUARD_THRESHOLD,focus.power+b.dmg);
+        if(focus.power>=EYE_GUARD_THRESHOLD){
+          focus.breached=true;banner('БРОНЯ ПРОБИТА','ГЛАЗ '+(i+1)+' · НЕ УВОДИ ОГОНЬ');
+          popText(p.x,p.y+42,'ПРОБОЙ!','#ffe29d');sfx('warn');
+        }else if(Math.random()<.3)burst(b.x,b.y,2,'#d27b4c',65,.22,2);
+      }else hitBossEye(B,e,i,b);
+      return true;
     }
   }
   if(B.phase===4&&B.state==='mirror'){
@@ -1408,7 +1609,7 @@ function bomb(){
   if(escort&&escort.active){escort.inv=Math.max(escort.inv,1.9);escort.grabbed=0}
   if(boss){
     if(boss.phase===1){for(const e of boss.eyes)if(e.hp>0){e.hp=Math.max(0,e.hp-28);e.f=.15;
-      if(e.hp===0){const p=eyePos(e);boom(p.x,p.y,44);G.score+=500;G.kMon++}}}
+      if(e.hp===0){const p=eyePos(e);boom(p.x,p.y,44);G.score+=500;G.kMon++;G.kEye=(G.kEye||0)+1;resetEyeGuard(boss)}}}
     if(boss.phase===4){for(const c of boss.clones)if(c.hp>0){c.hp-=27;c.flash=.2;
       if(c.hp<=0){c.hp=0;boom(c.x,c.y,35);G.kMon++;G.kClone++}}}
     if(boss.phase===5&&D.crewDone&&boss.mawWindow&&boss.maw.hp>0){boss.maw.hp-=44;boss.maw.f=.15;if(boss.maw.hp<=0)bossDie()}
@@ -1419,8 +1620,13 @@ function bomb(){
 function hurtP(d){
   if(G.god||P.inv>0||P.buf.shield>0||G.mode!=='play')return;
   if(P.ord&&P.ord.k==='cover')d*=.5;const was=P.hp;P.hp-=d;G.hpLost+=Math.min(d,was);P.inv=1.1;G.shake=12;G.flash=.3;sfx('hurt');burst(P.x,P.y,12,'#ff3b4e',180,.5,4);
-  if(P.hp>0&&P.hp<=18&&!P.nearSaid){P.nearSaid=1;say(pick(ELPIS_NEAR.concat(ELPIS_MORE_HURT)),true)}
-  else if(P.hp>0&&Math.random()<.11)say(pick(P.hp<30?ELPIS_LOW.concat(ELPIS_MORE_HURT):ELPIS_HURT.concat(ELPIS_MORE_HURT)),true);
+  if(P.hp>0){
+    const firstHit=!G.barkSeen||!G.barkSeen.hurt;
+    barkEvent('hurt',ELPIS_FIRST_BARKS.hurt,
+      P.hp<30?ELPIS_LOW.concat(ELPIS_MORE_HURT):ELPIS_HURT.concat(ELPIS_MORE_HURT),.17,48);
+    // The critical-hull warning is a separate one-off story beat, not a repeated bark.
+    if(P.hp<=18&&!P.nearSaid){P.nearSaid=1;if(!firstHit)say(pick(ELPIS_NEAR),true)}
+  }
   if(P.hp<=0){P.hp=0;die()}
 }
 function hurtEnt(e,d){
@@ -1429,16 +1635,32 @@ function hurtEnt(e,d){
 }
 function killEnt(e){
   e.dead=true;G.score+=e.score;boom(e.x,e.y,e.r*1.6);
-  if(e.kind==='rock'){G.kRock++;
+  if(e.kind==='rock'){
+    G.kRock++;
+    barkEvent('rock',ELPIS_FIRST_BARKS.rock,ELPIS_KILL.concat(ELPIS_MORE_KILLS),.08,55);
     if(e.size>1)for(let i=0;i<2;i++)spawnRock(e.size-1,e.x+(i?10:-10),e.y,e.vx+(i?60:-60)+rnd(-20,20),e.vy*rnd(.8,1.2)+rnd(-20,30));
     if(Math.random()<(G.route&&G.route.k==='fall'?.34:.16))dropTalons(e.x,e.y,e.size);
     if(Math.random()<.006&&G.act===0)spawnPick('ration',e.x,e.y);
-  }else{G.kMon++;G.dirt=Math.min(14,(G.dirt||0)+(e.kind==='eye'?1.2:.8));if(e.kind==='wit')G.kWit=(G.kWit||0)+1;sayRare(ELPIS_KILL.concat(ELPIS_MORE_KILLS),.05,45000);if(e.kind==='eye')G.kEye++;dropTalons(e.x,e.y,e.kind==='eye'?3:2);if(Math.random()<.008&&G.act!==1)spawnPick('ration',e.x,e.y);
-    if(e.kind==='eye'&&!D.sawEye&&G.act===0){D.sawEye=1;say('Помолчал.',true);say('— Я тоже. Показания сходятся.');say('Записал: «Двое независимых свидетелей».')}}
+  }else{
+    G.kMon++;G.dirt=Math.min(14,(G.dirt||0)+(e.kind==='eye'?1.2:.8));
+    if(e.kind==='wit')G.kWit=(G.kWit||0)+1;
+    if(e.kind==='eye')G.kEye++;
+    const firstOriginalEye=e.kind==='eye'&&!D.sawEye&&G.act===0;
+    if(firstOriginalEye){
+      // The original three-line literary scene IS the unique first-eye reaction.
+      G.barkSeen=G.barkSeen||{};G.barkSeen.eye=true;G.nextBarkAt=Math.max(G.nextBarkAt||0,G.time+35);
+      D.sawEye=1;say('Помолчал.',true);say('— Я тоже. Показания сходятся.',true);say('Записал: «Двое независимых свидетелей».',true);
+    }else{
+      const category=ELPIS_FIRST_BARKS[e.kind]?e.kind:'eye';
+      barkEvent(category,ELPIS_FIRST_BARKS[category],ELPIS_KILL.concat(ELPIS_MORE_KILLS),.14,48);
+    }
+    dropTalons(e.x,e.y,e.kind==='eye'?3:2);
+    if(Math.random()<.008&&G.act!==1)spawnPick('ration',e.x,e.y);
+  }
 }
 function hurtTent(t,d){
   if(t.st==='in'||t.st==='warn'||t.dead)return;t.hp-=d;t.flash=.08;
-  if(t.hp<=0){t.st='in';G.score+=120;G.kMon++;G.kTent++;dropTalons(t.pts.length?t.pts[t.pts.length-1].x:W/2,t.pts.length?t.pts[t.pts.length-1].y:300,5);sfx('boom');G.shake=Math.max(G.shake,6)}
+  if(t.hp<=0){t.st='in';G.score+=120;G.kMon++;G.kTent++;barkEvent('tent',ELPIS_FIRST_BARKS.tent,ELPIS_KILL.concat(ELPIS_MORE_KILLS),.10,55);dropTalons(t.pts.length?t.pts[t.pts.length-1].x:W/2,t.pts.length?t.pts[t.pts.length-1].y:300,5);sfx('boom');G.shake=Math.max(G.shake,6)}
 }
 function tentCalc(t){
   const bx=t.side<0?-8:W+8,n=18,pts=[];
@@ -1464,16 +1686,16 @@ function shoot(){
   const bit=P.buf.bit>0,d=bit?2:1,sp=820;
   const pb=(x,y,ang)=>bullets.push({x,y,vx:Math.sin(ang)*sp,vy:-Math.cos(ang)*sp,dmg:d,pierce:bit?3:0,r:bit?7:4,hit:null,life:1.6,bit});
   pb(P.x-8,P.y-42,0);pb(P.x+8,P.y-42,0);
-  if(P.buf.tri>0){pb(P.x,P.y-50,0);pb(P.x-14,P.y-34,-.2);pb(P.x+14,P.y-34,.2)}
-  if(P.buf.wit>0&&(P.sn=(P.sn||0)+1)%3)for(const dr of P.dr){pb(dr.x,dr.y-30,0);bullets[bullets.length-1].dmg=.5}
-  if(P.ord&&P.ord.k==='guns'){pb(P.x-20,P.y-36,-.12);pb(P.x+20,P.y-36,.12);pb(P.x,P.y-52,0)}
+  if(P.buf.tri>0){pb(P.x,P.y-50,0);pb(P.x-14,P.y-34,-.2);bullets[bullets.length-1].support=true;pb(P.x+14,P.y-34,.2);bullets[bullets.length-1].support=true}
+  if(P.buf.wit>0&&(P.sn=(P.sn||0)+1)%3)for(const dr of P.dr){pb(dr.x,dr.y-30,0);bullets[bullets.length-1].dmg=.5;bullets[bullets.length-1].fromWitness=true}
+  if(P.ord&&P.ord.k==='guns'){pb(P.x-20,P.y-36,-.12);bullets[bullets.length-1].support=true;pb(P.x+20,P.y-36,.12);bullets[bullets.length-1].support=true;pb(P.x,P.y-52,0)}
   sfx('shoot');
 }
 
 
 /* ===== progress persistence / audio resume ===== */
 const SAVE_KEY='elpisSaveV7';
-const SAVE_KEYS=['score','talons','kRock','kMon','buffs','deaths','time','rescues','failed','signal','pixelJumps','qteSuccess','stampsUsed','kEye','kTent','kClone','hpLost','talonBomb','escDmg','counters','dirt','cleanN','kWit','ordDone','rescuedNames','hardcore','runCount'];
+const SAVE_KEYS=['score','talons','kRock','kMon','buffs','deaths','time','rescues','failed','signal','pixelJumps','qteSuccess','stampsUsed','kEye','kTent','kClone','hpLost','talonBomb','escDmg','counters','dirt','cleanN','kWit','ordDone','rescuedNames','hardcore','runCount','barkSeen','barkLines','nextBarkAt'];
 const SESSION_KEYS=['t','nOrd','quiet','_b','ordNext','evN','evNext','evPool','mapDone','mapAt','route','ev','plaque','counter','crew','majorLock','lastOrd','ordDone','escortGoal'];
 let lastSaveAt=0;
 function saveGame(force=false){
@@ -1482,7 +1704,7 @@ function saveGame(force=false){
     const st={};for(const k of SAVE_KEYS)st[k]=G[k];
     const rt={};for(const k of SESSION_KEYS)rt[k]=G[k];
     const snap={version:7,act:G.act,hp:P.hp,bombs:P.bombs,st,
-      full:G.mode==='play'?{rt,P,D,escort,boss,ents,tents,ebul,picks,rifts,gaze}:null};
+      full:G.mode==='play'?{rt,P,D,escort,boss,ents,tents,ebul,picks,rifts,gaze,pendingBarks:sayQ.filter(q=>q.featured||q.bark).map(q=>({...q}))}:null};
     localStorage.setItem(SAVE_KEY,JSON.stringify(snap));refreshCont();lastSaveAt=G.time;
   }catch(e){/* private browsing or storage quota: game still plays */}
 }
@@ -1508,6 +1730,7 @@ $('goCont').onclick=()=>{
     escort=f.escort||null;boss=f.boss||null;ents=f.ents||[];tents=f.tents||[];
     ebul=f.ebul||[];picks=f.picks||[];rifts=f.rifts||[];gaze=f.gaze||null;
     bullets=[];parts=[];texts=[];G.mode='play';
+    if(Array.isArray(f.pendingBarks))for(const q of f.pendingBarks){if(q&&typeof q.t==='string'&&!sayQ.some(x=>x.t===q.t))sayQ.push({...q,age:Math.max(0,Number(q.age)||0)})}
     $('objective').classList.toggle('hide',!(escort&&escort.active));
     if(escort&&escort.active)$('objective').textContent='ЗАЩИТИТЬ ПУСТОЙ КОРАБЛЬ «'+escort.name+'»';
     if(escort&&escort.active)escort.inv=Math.max(escort.inv||0,1.5);
@@ -2064,12 +2287,16 @@ function drawBoss(){
   // maw
   const M=B.maw,mx=B.x,my=B.y+105,op=M.open;
   if(B.phase===5&&D.crewDone&&M.hp>0){
-    ctx.save();ctx.strokeStyle=B.mawWindow?'rgba(255,113,143,'+(.67+.28*Math.sin(t*7))+')':'rgba(134,185,231,'+(.35+.18*Math.sin(t*5))+')';
-    ctx.shadowColor=B.mawWindow?'#ff426b':'#56addb';ctx.shadowBlur=18;ctx.lineWidth=3;
-    ctx.beginPath();ctx.ellipse(B.x,B.y+100,78,68,0,0,TAU);ctx.stroke();
-    if(!B.mawWindow){ctx.fillStyle='rgba(80,145,200,.17)';ctx.fill()}
-    ctx.font='bold 13px Georgia';ctx.textAlign='center';ctx.fillStyle=B.mawWindow?'#ffd2cf':'#a4d5f9';
-    ctx.fillText(B.mawWindow?'УЯЗВИМА':'ЗАЩИТА',B.x,B.y+190);
+    const cycle=(B.mawCycle||0)%8.2,warning=cycle>=2.55&&cycle<3.7;
+    ctx.save();ctx.textAlign='center';ctx.font='bold 13px Georgia';
+    ctx.fillStyle=B.mawWindow?'#ffd9aa':warning?'#ff967e':'#d8a992';
+    ctx.shadowColor=B.mawWindow?'#f53247':warning?'#dd6b38':'#531825';
+    ctx.shadowBlur=B.mawWindow?15:6;
+    ctx.fillText(B.mawWindow?'ПАСТЬ РАСКРЫТА · БЕЙ':warning?'ПАСТЬ ОТКРЫВАЕТСЯ':'ПАСТЬ ЗАКРЫТА · УКЛОНЯЙСЯ',B.x,B.y+191);
+    if(warning){
+      ctx.strokeStyle='rgba(255,93,54,'+(.2+.6*Math.abs(Math.sin(t*10)))+')';ctx.lineWidth=2;
+      ctx.beginPath();ctx.ellipse(mx,my,64,8+(cycle-2.55)*18,0,0,TAU);ctx.stroke();
+    }
     ctx.restore();
   }
   if(M.hp>0||B.state==='dying'){
@@ -2081,8 +2308,23 @@ function drawBoss(){
     for(let i=0;i<nt;i++){const tx=-w+8+i*((w*2-16)/(nt-1)),ty=-h*.85*(1-Math.pow(tx/w,2)*.3);ctx.beginPath();ctx.moveTo(tx-5,ty-1);ctx.lineTo(tx,ty+7+op*6);ctx.lineTo(tx+5,ty-1);ctx.fill();
       if(op>.3){ctx.beginPath();ctx.moveTo(tx-5,-ty+1);ctx.lineTo(tx,-ty-7-op*4);ctx.lineTo(tx+5,-ty+1);ctx.fill()}}
     ctx.strokeStyle='#2a0a10';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,w,h,0,0,TAU);ctx.stroke();ctx.restore()}
-  // eyes
-  for(const e of B.eyes){const p=eyePos(e);drawEye(p.x,p.y,30,t,e.f,e.hp<=0)}
+  // eyes and a readable, local armor-breach indicator for the focused eye
+  for(let i=0;i<B.eyes.length;i++){
+    const e=B.eyes[i],p=eyePos(e);drawEye(p.x,p.y,30,t,e.f,e.hp<=0);
+    if(B.phase===1&&e.hp>0){
+      const g=B.guard||{},focused=g.eye===i,progress=focused?clamp(g.power/EYE_GUARD_THRESHOLD,0,1):0;
+      ctx.save();ctx.lineWidth=2.6;ctx.strokeStyle=focused&&g.breached?'#ffe0a0':'rgba(191,61,48,.7)';
+      ctx.shadowColor=focused&&g.breached?'#ffd486':'#d12738';ctx.shadowBlur=focused?12:4;
+      ctx.beginPath();ctx.arc(p.x,p.y,34,-Math.PI*.8,Math.PI*.8);ctx.stroke();ctx.shadowBlur=0;
+      if(focused){
+        ctx.strokeStyle='#f4c18b';ctx.lineWidth=4.4;
+        ctx.beginPath();ctx.arc(p.x,p.y,38,-Math.PI/2,-Math.PI/2+TAU*(g.breached?1:progress));ctx.stroke();
+        if(g.breached){ctx.fillStyle='#ffe7ad';ctx.font='bold 11px Georgia';ctx.textAlign='center';ctx.fillText('ПРОБОЙ',p.x,p.y+54)}
+        else{ctx.fillStyle='#e6b083';ctx.font='bold 10px Georgia';ctx.textAlign='center';ctx.fillText('БРОНЯ '+Math.round(progress*100)+'%',p.x,p.y+53)}
+      }
+      ctx.restore();
+    }
+  }
   ctx.restore();
 
 }
@@ -2204,7 +2446,7 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-window.__G={G,get P(){return P},get escort(){return escort},get boss(){return boss},startAct,update,draw,ents:()=>ents,tents:()=>tents,setP(){P=newPlayer()},startEscort,showSignal,signalDecision,actDone,ending,bomb,startPixelPuzzle,chooseTile,startQte,commitQte,resolveQte,startMirror,get puzzle(){return puzzle},get qte(){return qte},startRiftFinal,updateRiftFinal,showLedger,startCredits,showLeadCredits,get roster(){return CREW_ROSTER}};
+window.__G={G,get P(){return P},get escort(){return escort},get boss(){return boss},startAct,update,draw,ents:()=>ents,tents:()=>tents,setP(){P=newPlayer()},startEscort,showSignal,signalDecision,actDone,ending,bomb,startPixelPuzzle,chooseTile,startQte,commitQte,resolveQte,startMirror,get puzzle(){return puzzle},get qte(){return qte},startRiftFinal,updateRiftFinal,showLedger,startCredits,showLeadCredits,get roster(){return CREW_ROSTER},get guard(){return boss&&boss.guard},bossHit,resetEyeGuard,updateEyeGuard,openCheat,applyCheat,get cheat(){return cheatSession},cheatSceneLines};
 </script>
 </body>
 </html>
